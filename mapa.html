@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mapa — Municípios + Pontos (ícones de localização)</title>
+
+  <!-- Leaflet + Cluster -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+
+  <style>
+    :root{ --ink:#0f172a; }
+    body{ margin:0; font-family: Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); }
+    .wrap{ max-width:1200px; margin:0 auto; padding:1rem; }
+    #map{ height: 72vh; border-radius:12px; border:1px solid #e6edf8; }
+    .toolbar{ display:flex; gap:.75rem; align-items:center; margin:.75rem 0 1rem; flex-wrap:wrap; }
+    .legend{ background:#fff; border:1px solid #e6edf8; border-radius:10px; padding:.5rem .75rem; box-shadow:0 8px 22px rgba(0,0,0,.06); display:flex; align-items:center; gap:.5rem; }
+    .legend .chip{ display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .5rem; border-radius:999px; border:1px solid #e6edf8; background:#fff; }
+    .dot{ width:14px; height:14px; border-radius:50%; display:inline-block; }
+    .dot.act { background: linear-gradient(90deg,#22c55e,#16a34a); border:1px solid #a7f3d0; }
+    .dot.inact { background:#e5e7eb; border:1px solid #cbd5e1; }
+    .muni-tip { font-weight:700; color:#0f172a; background:#ffffffd9; border-radius:6px; border:1px solid #e6edf8; }
+    .l-popup h4{ margin:.2rem 0 .35rem; }
+
+    /* ===== ÍCONES DE LOCALIZAÇÃO (PIN) ===== */
+    .pin {
+      width: 28px; height: 40px;
+      position: relative;
+      transform: translate(-50%,-100%);
+      animation: bounce 1.2s infinite;
+    }
+    .pin .shape {
+      width: 28px; height: 28px;
+      background: var(--c, #ff0000);
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      position: absolute;
+      left: 0; top: 0;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+    .pin .shape::after {
+      content: '';
+      width: 12px; height: 12px;
+      margin: 8px 0 0 8px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+    }
+    .pin.inactive { --c: #9ca3af; } /* cinza */
+
+    @keyframes bounce {
+      0%, 100% { transform: translate(-50%,-100%) scale(1); }
+      50%      { transform: translate(-50%,-105%) scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Mapa de Atuação</h1>
+    <div class="toolbar">
+      <div class="legend">
+        <span class="chip"><span class="dot act"></span> Ativo</span>
+        <span class="chip"><span class="dot inact"></span> Outros status</span>
+      </div>
+      <label style="margin-left:.5rem;"><input type="checkbox" id="onlyActive"> mostrar apenas “Ativo”</label>
+    </div>
+    <div id="map" role="region" aria-label="Mapa de atuação do programa"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script>
+  (function(){
+    const GEOJSON_POLY_URL   = "./municipios.json";
+    const GEOJSON_POINTS_URL = "./pontos.json";
+
+    const map = L.map('map', { zoomControl:true, minZoom:5, maxZoom:19 });
+    const baseCarto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      { maxZoom:20, attribution:'© OpenStreetMap · © Carto' }).addTo(map);
+    const baseMaps = { "Carto Light": baseCarto };
+    const piauiBounds = L.latLngBounds(L.latLng(-10.5,-45.0), L.latLng(-2.5,-40.0));
+    map.fitBounds(piauiBounds);
+
+    const overlays = {};
+    let muniLayer = null;
+    const cluster = L.markerClusterGroup({ showCoverageOnHover:false });
+    L.control.layers(baseMaps, overlays, { collapsed:false }).addTo(map);
+
+    const isActive = v => /^(ativo|sim|true|ok|1)$/i.test(String(v||'').trim());
+    const numBRtoFloat = v => {
+      const s = String(v||'').replace(/\s+/g,'').replace(/\./g,'').replace(',', '.');
+      const f = parseFloat(s);
+      return isNaN(f) ? null : f;
+    };
+    const getMuniName = props => (props && (props.municipio ?? '')) || 'Município';
+
+    function stylePolygon(feature){
+      const p = feature.properties || {};
+      const active = isActive(p.status);
+      return {
+        color: active ? '#16a34a' : '#64748b',
+        weight: active ? 2 : 1,
+        opacity: 0.9,
+        fillColor: active ? '#4ade80' : '#e5e7eb',
+        fillOpacity: active ? 0.35 : 0.15
+      };
+    }
+
+    function onEachPoly(feature, layer){
+      const p = feature.properties || {};
+      const nome = getMuniName(p);
+      const active = isActive(p.status);
+      const statusTxt = active ? '<span style="color:#16a34a;font-weight:700">Com atuação</span>' : 'Sem atuação';
+      layer.bindTooltip(`${nome}${active ? ' — ATUAÇÃO' : ''}`, { sticky:true, direction:'center', className:'muni-tip' });
+      layer.bindPopup(`<strong>${nome}</strong><br>${statusTxt}${p.info ? `<br>${p.info}`:''}`);
+    }
+
+    // cria DivIcon pin
+    function makePinIcon(props){
+      const active = isActive(props?.status);
+      const cls = active ? 'pin' : 'pin inactive';
+      return L.divIcon({
+        className: '',
+        html: `<div class="${cls}"><div class="shape"></div></div>`,
+        iconSize:[28,40],
+        iconAnchor:[14,40],
+        popupAnchor:[0,-35]
+      });
+    }
+
+    function bindPointPopup(layer, props){
+      const nome = getMuniName(props);
+      const status = props?.status || '';
+      const info = props?.info || '';
+      layer.bindPopup(`
+        <div class="l-popup">
+          <h4>${nome}</h4>
+          ${status ? `<div><small>Status:</small> <strong>${status}</strong></div>` : ''}
+          ${info ? `<div style="margin-top:.35rem">${info}</div>` : ''}
+        </div>
+      `);
+    }
+
+    let fullPolys=null, fullPoints=null;
+
+    function renderLayers({ onlyActive=false }={}){
+      if(muniLayer){ map.removeLayer(muniLayer); muniLayer=null; }
+      cluster.clearLayers();
+
+      if(fullPolys?.features?.length){
+        const polys = fullPolys.features.filter(f=>/Polygon/i.test(f.geometry?.type));
+        const filtered = onlyActive ? polys.filter(f=>isActive(f.properties?.status)) : polys;
+        if(filtered.length){
+          muniLayer = L.geoJSON({ type:'FeatureCollection', features:filtered }, {
+            style:stylePolygon, onEachFeature:onEachPoly
+          }).addTo(map);
+          overlays["Municípios"] = muniLayer;
+        }
+      }
+
+      if(fullPoints?.features){
+        const pts = fullPoints.features.filter(f=>/Point/i.test(f.geometry?.type));
+        const filteredPts = onlyActive ? pts.filter(f=>isActive(f.properties?.status)) : pts;
+        L.geoJSON({ type:'FeatureCollection', features:filteredPts },{
+          pointToLayer:(f,latlng)=>L.marker(latlng,{icon:makePinIcon(f.properties)}),
+          onEachFeature:(f,l)=>bindPointPopup(l,f.properties||{})
+        }).eachLayer(l=>cluster.addLayer(l));
+
+        const propsOnly = fullPoints.features.filter(f=>!f.geometry&&f.properties&&(f.properties.lat&&f.properties.lon));
+        const filteredProps = onlyActive ? propsOnly.filter(f=>isActive(f.properties?.status)) : propsOnly;
+        filteredProps.forEach(f=>{
+          const la=numBRtoFloat(f.properties.lat), lo=numBRtoFloat(f.properties.lon);
+          if(la==null||lo==null)return;
+          const m=L.marker([la,lo],{icon:makePinIcon(f.properties)});
+          bindPointPopup(m,f.properties||{});
+          cluster.addLayer(m);
+        });
+
+        if(cluster.getLayers().length&&!map.hasLayer(cluster)) map.addLayer(cluster);
+        if(cluster.getLayers().length) overlays["Pontos"]=cluster;
+      }
+
+      document.querySelectorAll('.leaflet-control-layers').forEach(el=>el.remove());
+      L.control.layers(baseMaps,overlays,{collapsed:false}).addTo(map);
+
+      const layers=[]; if(muniLayer) layers.push(muniLayer); if(cluster.getLayers().length) layers.push(cluster);
+      if(layers.length){ try{map.fitBounds(L.featureGroup(layers).getBounds().pad(0.08));}catch{map.fitBounds(piauiBounds);} }
+      else map.fitBounds(piauiBounds);
+    }
+
+    async function loadGeoJSON(url){ const r=await fetch(url); if(!r.ok)throw new Error('falha '+url); return r.json(); }
+    async function boot(){ [fullPolys,fullPoints]=await Promise.all([loadGeoJSON(GEOJSON_POLY_URL),loadGeoJSON(GEOJSON_POINTS_URL)]); renderLayers(); }
+    document.getElementById('onlyActive').addEventListener('change',e=>renderLayers({onlyActive:e.target.checked}));
+    boot();
+  })();
+  </script>
+</body>
+</html>

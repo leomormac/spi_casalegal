@@ -1,0 +1,108 @@
+<section>
+  <h1 id="sobre-o-programa" style="color:#1050a0;">Sobre o Programa</h1>
+
+  <!-- Intro: texto à esquerda + imagem à direita -->
+  <div class="intro" style="display:grid;grid-template-columns:1.25fr 1fr;gap:1.25rem;align-items:start;">
+    <div>
+      <p>
+        O <strong>Casa Legal</strong> é uma iniciativa do Governo do Estado do Piauí para promover
+        a regularização fundiária urbana e rural, garantindo segurança jurídica às famílias,
+        inclusão social e acesso a políticas públicas.
+      </p>
+      <p>
+        Com responsabilidade social e foco em resultados, o programa consolida parcerias
+        com os municípios, moderniza processos e utiliza transformação digital para
+        ampliar a qualidade do atendimento ao cidadão.
+      </p>
+    </div>
+
+    <figure class="card" style="margin:0;overflow:hidden;">
+      <img src="https://www.pi.gov.br/wp-content/uploads/2025/08/b56b0452-73fe-4854-a0f8-b5f038dc3006.jpeg"
+           alt="Equipe do programa realizando atendimento a beneficiária"
+           style="width:100%;height:auto;display:block;border-radius:8px;" loading="lazy">
+      <figcaption class="small" style="color:#64748b;margin-top:.35rem;">
+        Logotipo do Programa.
+      </figcaption>
+    </figure>
+  </div>
+
+  <!-- Missão em destaque (cartão com borda à esquerda) -->
+  <div class="card" id="missao" style="margin-top:1rem;border-left:6px solid #0a489b;">
+    <h3 style="margin-top:0;">Missão</h3>
+    <p style="margin:.25rem 0 0;">
+      Promover uma Administração Pública moderna, transparente e orientada a resultados,
+      apoiando os municípios e facilitando a vida do cidadão por meio da regularização fundiária.
+    </p>
+  </div>
+
+  <!-- Pilares -->
+  <h2 id="pilares" style="margin-top:1.25rem;">Nossos pilares</h2>
+  <div class="cards">
+    <div class="card" id="visao">
+      <h3>Visão</h3>
+      <p>
+        Ser referência na gestão pública, com destaque para transformação digital,
+        eficiência e transparência.
+      </p>
+    </div>
+
+    <div class="card" id="valores">
+      <h3>Valores</h3>
+      <ul style="list-style:none;padding-left:0;margin:0;">
+        <li style="display:flex;gap:.5rem;align-items:flex-start;margin:.35rem 0;">
+          <i class="bi bi-check-circle-fill" aria-hidden="true" style="color:#16a34a;"></i>
+          <span><strong>Ética</strong> e integridade no serviço público</span>
+        </li>
+        <li style="display:flex;gap:.5rem;align-items:flex-start;margin:.35rem 0;">
+          <i class="bi bi-check-circle-fill" aria-hidden="true" style="color:#16a34a;"></i>
+          <span>Colaboração e respeito às pessoas</span>
+        </li>
+        <li style="display:flex;gap:.5rem;align-items:flex-start;margin:.35rem 0;">
+          <i class="bi bi-check-circle-fill" aria-hidden="true" style="color:#16a34a;"></i>
+          <span>Transparência e dados para decisão</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card" id="diretrizes">
+      <h3>Diretrizes</h3>
+      <ul style="list-style:none;padding-left:0;margin:0;">
+        <li style="display:flex;gap:.5rem;align-items:flex-start;margin:.35rem 0;">
+          <i class="bi bi-check-square-fill" aria-hidden="true" style="color:#0a489b;"></i>
+          <span>Simplificar processos e reduzir burocracia</span>
+        </li>
+        <li style="display:flex;gap:.5rem;align-items:flex-start;margin:.35rem 0;">
+          <i class="bi bi-check-square-fill" aria-hidden="true" style="color:#0a489b;"></i>
+          <span>Digitalizar serviços com foco em usabilidade</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Resultados e Metas -->
+  <div class="card" id="resultados-e-metas" style="margin-top:1rem;">
+    <h3 style="margin-top:0;">Resultados e metas</h3>
+    <p>
+      Acompanhe pelas <a href="?page=noticias">Notícias</a>,
+     <a href="#" id="btnRegularizometro">Regularizômetro</a> e
+     <a href="https://majestic-duckanoo-b4cb2b.netlify.app/" target="_blank" rel="noopener">Resultados</a>.
+    </p>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <a class="btn" href="https://majestic-duckanoo-b4cb2b.netlify.app/" style="display:inline-block;background:#0a489b;color:#fff;border-radius:8px;padding:.5rem .85rem;">Abrir Resultados</a>
+      <a class="btn" href="#" id="btnRegularizometro2" style="display:inline-block;background:#0a489b;color:#fff;border-radius:8px;padding:.5rem .85rem;">Abrir Regularizômetro</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  // abrir o Regularizômetro pelos botões da página
+  (function(){
+    const open = () => {
+      const back = document.getElementById('regzBackdrop');
+      const modal = document.getElementById('regzModal');
+      if(back && modal){ back.classList.add('open'); modal.classList.add('open'); document.body.style.overflow='hidden'; }
+    };
+    document.getElementById('btnRegularizometro')?.addEventListener('click', e => { e.preventDefault(); open(); });
+    document.getElementById('btnRegularizometro2')?.addEventListener('click', e => { e.preventDefault(); open(); });
+  })();
+</script>

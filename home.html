@@ -1,0 +1,293 @@
+<!-- home.html -->
+<section class="hero" aria-label="Destaques">
+  <div class="carousel" id="carousel">
+    <div class="slide active">
+      <a href="https://www.sead.pi.gov.br/programa-casa-legal-e-destaque-na-6a-conferencia-nacional-das-cidades" target="_blank" rel="noopener">
+        <img src="https://www.pi.gov.br/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-14.47.28-1536x1152.jpeg"
+             alt="Programa Casa Legal é destaque na 6ª Conferência Nacional das Cidades"
+             style="width:100%;height:420px;object-fit:cover">
+        <div class="caption">Programa Casa Legal é destaque na 6ª Conferência Nacional das Cidades</div>
+      </a>
+    </div>
+    <div class="slide">
+      <a href="https://www.pi.gov.br/sead-vai-regularizar-2-mil-imoveis-no-bairro-santa-maria-da-codipi-com-o-casa-legal/" target="_blank" rel="noopener">
+        <img src="https://i.postimg.cc/v8vrf1FY/Whats-App-Image-2025-08-01-at-19-41-29-1024x683.jpg"
+             alt="Sead vai regularizar 2 mil imóveis no bairro Santa Maria da Codipi com o Casa Legal"
+             style="width:100%;height:420px;object-fit:cover">
+        <div class="caption">Sead vai regularizar 2 mil imóveis no bairro Santa Maria da Codipi com o Casa Legal</div>
+      </a>
+    </div>
+    <div class="slide">
+      <a href="https://www.pi.gov.br/rafael-fonteles-entrega-mil-registros-de-imoveis-em-piripiri-e-celebra-70-mil-titulos-em-todo-o-piaui/" target="_blank" rel="noopener">
+        <img src="https://i.postimg.cc/7LX2nyqL/piripiri.jpg"
+             alt="Rafael Fonteles entrega mil registros de imóveis em Piripiri e celebra 70 mil títulos em todo o Piauí"
+             style="width:100%;height:420px;object-fit:cover">
+        <div class="caption">Rafael Fonteles entrega mil registros de imóveis em Piripiri e celebra 70 mil títulos em todo o Piauí</div>
+      </a>
+    </div>
+    <div class="dots" id="dots"></div>
+  </div>
+</section>
+
+<!-- PERFIL + COMPETÊNCIAS -->
+<section aria-label="Perfil e Competências" class="home-section home-bio">
+  <!-- Coluna esquerda: card do perfil -->
+  <article class="bio-left">
+    <div class="bio-card">
+      <div class="bio-header">
+        <img class="bio-avatar" src="https://conectapiaui.com.br/media/image_bank/2024/3/thumbs/carol-viveiros_WVjDPVx.png.1200x0_q95_crop.png" alt="Foto da Superintendente" loading="lazy">
+        <div class="bio-ident">
+          <div class="bio-role">Superintendente</div>
+          <div class="bio-name">Caroline Viveiros Moura da Cruz</div>
+        </div>
+      </div>
+
+      <ul class="bio-list">
+        <li>
+          <span class="ico"><i class="bi bi-telephone-fill"></i></span>
+          <span>Telefone não informado</span>
+        </li>
+        <li>
+          <span class="ico"><i class="bi bi-envelope-fill"></i></span>
+          <a href="mailto:https://www.sead.pi.gov.br/">https://www.sead.pi.gov.br/</a>
+        </li>
+        <li>
+          <span class="ico"><i class="bi bi-clock-fill"></i></span>
+          <span>7h30 às 13h30.</span>
+        </li>
+        <li>
+          <span class="ico"><i class="bi bi-link-45deg"></i></span>
+          <a href="https://portal.pi.gov.br" target="_blank" rel="noopener">https://portal.pi.gov.br</a>
+        </li>
+        <li>
+          <span class="ico"><i class="bi bi-geo-alt-fill"></i></span>
+          <span>Av. Pedro Freitas 1900 (São Pedro), Teresina, PI</span>
+        </li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- Coluna direita: competências -->
+  <article class="bio-right">
+    <h2 class="titulo-destaque">O que fazemos</h2>
+    <p>
+      A Superintendência de Patrimônio Imobiliário do Piauí (SPI), ligada à Secretaria de Administração (SEAD), é responsável por coordenar, executar e controlar as atividades administrativas do patrimônio imobiliário do Estado, como planejar e executar a regularização fundiária urbana e rural, gerenciar o banco de dados geográficos dos imóveis estaduais e realizar inventários e avaliações. Suas ações incluem a formalização de propriedades para famílias e comunidades, o que promove segurança jurídica, dignidade e cidadania, além de ser um importante vetor de desenvolvimento econômico. 
+    </p>
+  </article>
+</section>
+
+<!-- BARRA DE ATALHOS FIXA -->
+<section aria-label="Atalhos rápidos">
+  <div class="home-cards-bar">
+    <div class="card">
+      <h3>Gestão do Patrimônio Imobiliário</h3>
+      <p>Coordenar e executar atividades administrativas relacionadas a todos os bens e direitos imobiliários do Estado do Piauí.</p>
+    </div>
+    <div class="card">
+      <h3>Regularização Fundiária</h3>
+      <p>Planejar e executar a política de regularização fundiária do Estado, tanto em áreas urbanas quanto rurais, regularizando ocupações legítimas em áreas públicas.</p>
+    </div>
+    <div class="card">
+      <h3>Inventário e Avaliação</h3>
+      <p>Gerenciar o banco de dados geográficos dos imóveis estaduais, realizar o inventário desses bens, definir metodologias de avaliação e analisar laudos.</p>
+    </div>
+    <div class="card">
+      <h3>Planejamento e Modernização</h3>
+      <p>Elaborar relatórios técnicos e subsidiar o planejamento da gestão pública estadual, utilizando novas tecnologias e conceitos para modernizar a gestão do patrimônio público.</p>
+    </div>
+  </div>
+</section>
+
+<!-- estilos específicos da home -->
+<style>
+  /* ===== CARROSSEL ===== */
+  .carousel { position: relative; overflow: hidden; border-radius: 12px; }
+  .carousel .slide { display: none; }
+  .carousel .slide.active { display: block; }
+  .carousel .caption {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: .65rem .9rem; color: #fff; font-weight: 600;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 100%);
+  }
+  .carousel .dots {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: 10px; display: flex; gap: 8px; z-index: 2;
+  }
+  .carousel .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: rgba(255,255,255,.6); cursor: pointer;
+  }
+  .carousel .dot.active { background: #fff; }
+
+  /* ===== HOME ===== */
+  .home-section { max-width: var(--container); margin: 1.5rem auto 0; padding: 0 1rem; }
+
+  .home-bio {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .bio-card {
+    background: #f6f7f9;
+    border: 1px solid #e6edf8;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 1rem;
+  }
+  .bio-header { 
+  display: grid; 
+  grid-template-columns: 80px 1fr; /* ajusta a coluna do avatar */
+  gap: .75rem; 
+  align-items: center; 
+  }
+
+  .bio-avatar {
+  width: 100px;        /* pode trocar p/ 64, 80, 96 conforme preferir */
+  height: 100px;       /* igual à largura p/ formar o círculo */
+  aspect-ratio: 1/1;  /* garante proporção quadrada */
+  border-radius: 50%; /* torna redondo */
+  object-fit: cover;  /* preenche sem distorcer */
+  display: block;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
+}
+  .bio-role { font-size: .92rem; color: var(--muted); line-height: 1.2; }
+  .bio-name { font-size: 1.05rem; font-weight: 700; }
+  .bio-list { list-style: none; margin: .75rem 0 0; padding: 0; display: grid; gap: .65rem; }
+  .bio-list li { display: grid; grid-template-columns: 22px 1fr; gap: .5rem; align-items: start; }
+  .bio-list .ico {
+    width: 22px; height: 22px; display: inline-grid; place-items: center;
+    border-radius: 6px; background: #f7fbff; border: 1px solid #e6edf8;
+    font-size: .95rem; color: #0a489b;
+  }
+  .bio-list .ico i { color: #0a489b; font-size: 16px; }
+  .bio-list a { color: #0a489b; }
+
+  .bio-right h2 { margin: 0 0 .75rem; font-size: 1.5rem; color: #0a489b; }
+  .bio-right p { margin: 0 0 .9rem; line-height: 1.75; color: #334155; }
+
+  @media (max-width: 980px) {
+    .home-bio { grid-template-columns: 1fr; }
+  }
+
+  .home-cards-bar .card {
+    text-align: left;   /* <<< garante que tudo dentro do card fica alinhado à esquerda */
+  }
+  .home-cards-bar .card h3 {
+    margin-bottom: .5rem; /* um respiro entre título e parágrafo */
+  }
+  .home-cards-bar .card p {
+    margin: 0; 
+    line-height: 1.6;    /* melhora a leitura */
+  }
+  .home-cards-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.home-cards-bar .card {
+  text-align: left;
+  padding: 1rem;
+  border: 1px solid #e6edf8;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  background: #fff;
+}
+
+.home-cards-bar .card h3 {
+  min-height: 48px; /* <<< força espaço igual para os títulos */
+  margin: 0 0 .5rem;
+  display: flex;
+  align-items: flex-end; /* mantém o texto grudado embaixo do espaço reservado */
+}
+
+.home-cards-bar .card p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.titulo-destaque {
+    font-size: 2rem;   /* aumenta a fonte (32px se base = 16px) */
+    font-weight: 700;  /* negrito */
+    color: #0a489b;    /* azul do seu layout */
+    margin-bottom: 1rem;
+  }
+
+</style>
+
+<!-- carrossel -->
+<script>
+(function(){
+  const car = document.getElementById('carousel');
+  if (!car) return;
+
+  const slides = Array.from(car.querySelectorAll('.slide'));
+  const dotsBox = car.querySelector('#dots');
+  const INTERVAL = 5000;
+  let idx = 0, timer = null, touchStartX = null, touchStartY = null;
+
+  function renderDots(){
+    if (!dotsBox) return;
+    dotsBox.innerHTML = '';
+    slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === idx ? ' active' : '');
+      d.addEventListener('click', () => go(i));
+      dotsBox.appendChild(d);
+    });
+  }
+
+  function go(n){
+    if (!slides.length) return;
+    slides[idx].classList.remove('active');
+    idx = (n + slides.length) % slides.length;
+    slides[idx].classList.add('active');
+    renderDots();
+  }
+
+  function next(){ go(idx + 1); }
+  function prev(){ go(idx - 1); }
+
+  function start(){ stop(); timer = setInterval(next, INTERVAL); }
+  function stop(){ if (timer) { clearInterval(timer); timer = null; } }
+
+  // Navegação por teclado (opcional: só ativa se o body tiver .page-home)
+  function onKey(e){
+    const onlyHome = document.body.classList.contains('page-home');
+    if (onlyHome && !document.contains(car)) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); prev(); }
+  }
+
+  // Swipe em dispositivos touch
+  function onTouchStart(e){
+    if (!e.touches || e.touches.length !== 1) return;
+    touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+  }
+  function onTouchEnd(e){
+    if (touchStartX == null) return;
+    const dx = (e.changedTouches?.[0]?.clientX ?? 0) - touchStartX;
+    const dy = (e.changedTouches?.[0]?.clientY ?? 0) - touchStartY;
+    if (Math.abs(dx) > 40 && Math.abs(dy) < 60) { dx < 0 ? next() : prev(); }
+    touchStartX = touchStartY = null;
+  }
+
+  // Inicialização
+  if (slides.length) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[0].classList.add('active');
+    renderDots();
+    start();
+
+    car.addEventListener('mouseenter', stop);
+    car.addEventListener('mouseleave', start);
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+    car.addEventListener('touchstart', onTouchStart, { passive: true });
+    car.addEventListener('touchend', onTouchEnd, { passive: true });
+  }
+})();
+</script>

@@ -1,0 +1,325 @@
+  <!-- noticias.html -->
+<style>
+  .nt-wrap { display: grid; gap: 1.25rem; }
+  .nt-lead { max-width: 75ch; color: var(--muted); line-height: 1.7; }
+
+  .nt-toolbar { display: grid; grid-template-columns: 1fr auto auto; gap: .75rem; align-items: center; }
+  .nt-toolbar .nt-input, .nt-toolbar select { width: 100%; border: 1px solid #e6edf8; background: #fff; border-radius: 10px; padding: .6rem .75rem; font: inherit; box-shadow: var(--shadow); }
+
+  .nt-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .nt-chip { border: 1px solid #e6edf8; background:#f7fbff; color: #1050a0; padding:.35rem .6rem; border-radius:999px; font-size:.85rem; cursor:pointer; }
+  .nt-chip.is-active { background: var(--blue); color:#fff; border-color: var(--blue); }
+
+  .nt-feature { display: grid; gap: 1rem; grid-template-columns: 1.3fr .7fr; align-items: start; }
+  .nt-feature figure { 
+    margin:0; 
+    border:1px solid #e6edf8; 
+    border-radius:12px; 
+    overflow:hidden; 
+    box-shadow: var(--shadow); 
+    background:#fff;
+    aspect-ratio: 16 / 9; /* <<< padroniza destaque */
+  }
+  .nt-feature img { 
+    display:block; 
+    width:100%; 
+    height:100%; 
+    object-fit:cover; 
+  }
+
+  .nt-meta { display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; font-size:.9rem; color:var(--muted); }
+  .nt-tag { display:inline-block; padding:.2rem .5rem; font-size:.75rem; border:1px solid #e6edf8; border-radius:999px; background:#fff; }
+
+  .nt-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; }
+  .nt-card { background:#fff; border:1px solid #e6edf8; border-radius:12px; overflow:hidden; box-shadow: var(--shadow); display:flex; flex-direction:column; }
+  .nt-card img { 
+    width:100%; 
+    aspect-ratio: 16 / 9; /* <<< padroniza cards */
+    object-fit:cover; 
+    display:block; 
+  }
+  .nt-card .nt-body { padding:.9rem 1rem; display:grid; gap:.4rem; }
+  .nt-card h3 { margin:.1rem 0; font-size:1.02rem; line-height:1.25; }
+  .nt-card p { margin:0; color: var(--muted); }
+  .nt-link { display:inline-block; padding:.45rem .7rem; border-radius:10px; text-decoration:none; border:1px solid #e6edf8; background:#f7fbff; }
+  .nt-link:hover { border-color: var(--blue); }
+
+  .nt-pager { display:flex; gap:.5rem; align-items:center; justify-content:center; }
+  .nt-pager button { border:1px solid #e6edf8; background:#fff; border-radius:10px; padding:.45rem .7rem; cursor:pointer; }
+  .nt-pager .is-current { background: var(--blue); color:#fff; border-color: var(--blue); }
+
+  .nt-wrap, .nt-wrap * { overflow-wrap:anywhere; word-break:break-word; }
+
+  @media (max-width:1080px){
+    .nt-feature{ grid-template-columns:1fr; } 
+    .nt-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } 
+  }
+  @media (max-width:680px){ 
+    .nt-toolbar{ grid-template-columns:1fr; } 
+    .nt-grid{ grid-template-columns: 1fr; } 
+    .nt-card img, .nt-feature figure { aspect-ratio: 4 / 3; } /* <<< ajusta em telas pequenas */
+  }
+
+</style>
+
+<h1 style="color: #1050a0;">Notícias</h1>
+
+<div class="nt-wrap" data-nt-root>
+  <p class="nt-lead">Acompanhe as principais novidades, comunicados e ações.</p>
+
+  <div class="nt-toolbar">
+    <input class="nt-input" type="search" placeholder="Buscar por título, resumo ou palavras-chave…" data-nt-search>
+    <select data-nt-sort aria-label="Ordenar">
+      <option value="desc">Mais recentes</option>
+      <option value="asc">Mais antigas</option>
+    </select>
+    <select data-nt-per aria-label="Itens por página">
+      <option value="6">6 / página</option>
+      <option value="9" selected>9 / página</option>
+      <option value="12">12 / página</option>
+    </select>
+  </div>
+
+  <div class="nt-chips" data-nt-chips></div>
+
+  <section class="nt-feature" aria-label="Matéria em destaque" data-nt-feature hidden>
+    <figure><img data-nt-feature-img alt=""></figure>
+    <div>
+      <div class="nt-meta">
+        <span class="nt-tag" data-nt-feature-cat></span>
+        <time data-nt-feature-date></time>
+      </div>
+      <h2 data-nt-feature-title></h2>
+      <p data-nt-feature-excerpt></p>
+      <p><a class="nt-link" target="_blank" rel="noopener" data-nt-feature-url>Saiba mais</a></p>
+    </div>
+  </section>
+
+  <div class="nt-grid" data-nt-grid></div>
+  <nav class="nt-pager" aria-label="Paginação" data-nt-pager></nav>
+</div>
+
+<script type="module">
+(function () {
+  console.log("noticias: script executou");
+
+  // -------- DADOS (exemplo). Troque pelos reais --------
+  const posts = [
+    {
+      id: 1,
+      title: "Programa Casa Legal é destaque na 6ª Conferência Nacional das Cidades",
+      date: "2025-08-20",
+      category: "Notícias",
+      excerpt: "O programa Casa Legal, de regularização fundiária urbana, foi escolhido como uma das propostas prioritárias que integrarão a contribuição do Piauí à nova Política Nacional de Desenvolvimento Urbano (PNDU).",
+      image: "https://www.pi.gov.br/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-14.47.28-1536x1152.jpeg",
+      url: "https://www.pi.gov.br/programa-casa-legal-e-destaque-na-6a-conferencia-nacional-das-cidades/"
+    },
+    {
+      id: 2,
+      title: "Sead vai regularizar 2 mil imóveis no bairro Santa Maria da Codipi com o Casa Legal",
+      date: "2025-08-21",
+      category: "Notícias",
+      excerpt: "A Secretaria da Administração (Sead) realiza, nesta sexta-feira (22), no bairro Santa Maria da Codipi, zona norte de Teresina, uma audiência pública para apresentar à população o programa de regularização fundiária urbana, o Casa Legal.",
+      image: "https://www.pi.gov.br/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-01-at-19.41.29.jpeg",
+      url: "https://www.pi.gov.br/sead-vai-regularizar-2-mil-imoveis-no-bairro-santa-maria-da-codipi-com-o-casa-legal/"
+    },
+    {
+      id: 3,
+      title: "Casa Legal substitui ProUrbe e entrega mais de mil imóveis regularizados em Piripiri nesta sexta (1º)",
+      date: "2025-07-31",
+      category: "Notícias",
+      excerpt: "O Governo do Estado do Piauí, por meio da Secretaria da Administração (Sead), anuncia nesta sexta-feira (1º) a reformulação do Programa de Regularização Fundiária Urbana Específica (ProUrbe), que passa a se chamar Casa Legal.",
+      image: "https://www.pi.gov.br/wp-content/uploads/2025/08/ab26c8ad-0591-4b08-82fa-7cdcab2c7a17-1.jpeg",
+      url: "https://www.pi.gov.br/casa-legal-substitui-prourbe-e-entrega-mais-de-mil-imoveis-regularizados-em-piripiri-nesta-sexta-1o/"
+    },
+    {
+      id: 4,
+      title: "ProUrbe intensifica regularização fundiária de imóveis em Teresina e entrega registros em comunidades",
+      date: "2025-06-03",
+      category: "Notícias",
+      excerpt: "A Secretaria da Administração (Sead) está realizando novos cadastros de moradores de diversos bairros de Teresina por meio do Programa de Regularização Fundiária Urbana (ProUrbe).",
+      image: "https://www.pi.gov.br/wp-content/uploads/2025/06/WhatsApp-Image-2025-02-11-at-11.14.41.jpeg",
+      url: "https://www.pi.gov.br/prourbe-intensifica-regularizacao-fundiaria-de-imoveis-em-teresina-e-entrega-registros-em-comunidades/"
+    },
+    {
+      id: 5,
+      title: "ProUrbe: Sead vai regularizar quase dois mil imóveis em João Costa e São Francisco de Assis do Piauí em parceria com as prefeituras",
+      date: "2025-05-14",
+      category: "Notícias",
+      excerpt: "A Secretaria de Administração (Sead), por meio da Superintendência de Patrimônio Imobiliário (SPI), realizou, nesta quarta-feira (14), duas audiências públicas nas cidades de João Costa e São Francisco de Assis do Piauí.",
+      image: "https://www.pi.gov.br/wp-content/uploads/2025/05/WhatsApp-Image-2025-05-14-at-16.19.19-2048x1536.jpeg",
+      url: "https://www.pi.gov.br/prourbe-intensifica-regularizacao-fundiaria-de-imoveis-em-teresina-e-entrega-registros-em-comunidades/"
+    },
+    {
+      id: 6,
+      title: "ProUrbe: Sead vai regularizar mais de 2 mil imóveis no município de Piripiri",
+      date: "2025-04-28",
+      category: "Notícias",
+      excerpt: "A Secretaria de Administração (Sead), por meio da Superintendência de Patrimônio Imobiliário (SPI), deu início ao cadastro social de moradores no Programa de Regularização Fundiária Urbana Específica (ProUrbe) nos bairros Prado e Expedito Resende em Piripiri.",
+      image: "https://www.pi.gov.br/wp-content/uploads/2025/04/19cc4c2a-6eac-4e4e-970f-526715f604f5-2048x1365.jpeg",
+      url: "https://www.pi.gov.br/prourbe-sead-vai-regularizar-mais-de-2-mil-imoveis-no-municipio-de-piripiri/"
+    }
+  ];
+
+  // -------- utilitários --------
+  const PLACEHOLDER = "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?q=80&w=1200&auto=format&fit=crop";
+
+  function fixImageURL(url) {
+    if (!url) return url;
+    try { const u = new URL(url, location.href); if (u.protocol === "http:") u.protocol = "https:"; url = u.toString(); } catch {}
+    const driveIdMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
+    if (driveIdMatch && driveIdMatch[1]) return `https://drive.google.com/uc?export=view&id=${driveIdMatch[1]}`;
+    const imgurMatch = url.match(/^https?:\/\/imgur\.com\/([A-Za-z0-9]+)$/);
+    if (imgurMatch && imgurMatch[1]) return `https://i.imgur.com/${imgurMatch[1]}.jpg`;
+    return url;
+  }
+  function safeImg(url, alt) {
+    const fixed = fixImageURL(url) || PLACEHOLDER;
+    const escAlt = String(alt || "").replace(/"/g, "&quot;");
+    return `<img src="${fixed}" alt="${escAlt}" loading="lazy" onerror="this.onerror=null; this.src='${PLACEHOLDER}'">`;
+  }
+  function formatDate(iso) {
+    try { return new Date(iso + "T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"}); } catch { return iso; }
+  }
+  function norm(s){ return (s||"").toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu,""); }
+
+  // -------- DOM --------
+  const $root   = document.querySelector("[data-nt-root]"); if (!$root) return;
+  const $grid   = $root.querySelector("[data-nt-grid]");
+  const $pager  = $root.querySelector("[data-nt-pager]");
+  const $chips  = $root.querySelector("[data-nt-chips]");
+  const $search = $root.querySelector("[data-nt-search]");
+  const $sort   = $root.querySelector("[data-nt-sort]");
+  const $per    = $root.querySelector("[data-nt-per]");
+
+  const $featSec = $root.querySelector("[data-nt-feature]");
+  const $featImg = $root.querySelector("[data-nt-feature-img]");
+  const $featCat = $root.querySelector("[data-nt-feature-cat]");
+  const $featDate= $root.querySelector("[data-nt-feature-date]");
+  const $featTit = $root.querySelector("[data-nt-feature-title]");
+  const $featExc = $root.querySelector("[data-nt-feature-excerpt]");
+  const $featUrl = $root.querySelector("[data-nt-feature-url]");
+
+  // -------- estado --------
+  let state = { q: "", cat: "Todas", sort: "desc", per: 9, page: 1 };
+  const cats = ["Todas", ...Array.from(new Set(posts.map(p => p.category)))];
+
+  // -------- UI: chips --------
+  function renderChips(){
+    $chips.innerHTML = "";
+    cats.forEach(cat => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "nt-chip" + (state.cat === cat ? " is-active" : "");
+      b.textContent = cat;
+      b.addEventListener("click", () => {
+        state.cat = cat; state.page = 1;
+        $chips.querySelectorAll(".nt-chip").forEach(c=>c.classList.remove("is-active"));
+        b.classList.add("is-active");
+        render();
+      });
+      $chips.appendChild(b);
+    });
+  }
+
+  // -------- filtro/ordenar --------
+  function getFiltered(){
+    let arr = posts.slice();
+    if(state.q){
+      const nq = norm(state.q);
+      arr = arr.filter(p =>
+        norm(p.title).includes(nq) ||
+        norm(p.excerpt).includes(nq) ||
+        norm(p.category).includes(nq)
+      );
+    }
+    if(state.cat !== "Todas"){ arr = arr.filter(p => p.category === state.cat); }
+    arr.sort((a,b) => state.sort==="asc" ? new Date(a.date)-new Date(b.date) : new Date(b.date)-new Date(a.date));
+    return arr;
+  }
+
+  // -------- destaque --------
+  function renderFeature(list){
+    if(!list.length){ $featSec.hidden = true; return; }
+    const top = list[0];
+    $featImg.src = fixImageURL(top.image) || PLACEHOLDER;
+    $featImg.onerror = () => { $featImg.src = PLACEHOLDER; };
+    $featImg.alt = top.title;
+    $featCat.textContent = top.category;
+    $featDate.textContent = formatDate(top.date);
+    $featTit.textContent = top.title;
+    $featExc.textContent = top.excerpt;
+    $featUrl.href = top.url || "#";
+    $featSec.hidden = false;
+  }
+
+  // -------- grid --------
+  function renderGrid(list){
+    const start = (state.page - 1) * state.per;
+    const pageItems = list.slice(start, start + state.per);
+    $grid.innerHTML = pageItems.map(p => `
+      <article class="nt-card">
+        ${safeImg(p.image, p.title)}
+        <div class="nt-body">
+          <div class="nt-meta">
+            <span class="nt-tag">${p.category}</span>
+            <time>${formatDate(p.date)}</time>
+          </div>
+          <h3>${p.title}</h3>
+          <p>${p.excerpt}</p>
+          <p><a class="nt-link" target="_blank" rel="noopener" href="${p.url || '#'}">Saiba mais</a></p>
+        </div>
+      </article>
+    `).join("");
+  }
+
+  // -------- paginação --------
+  function renderPager(total){
+    const pages = Math.ceil(total / state.per) || 1;
+    state.page = Math.min(Math.max(1, state.page), pages);
+    $pager.innerHTML = "";
+    if(pages <= 1) return;
+
+    function addBtn(label, page, disabled=false, current=false){
+      const bt = document.createElement("button");
+      bt.textContent = label;
+      if(disabled) bt.disabled = true;
+      if(current) bt.classList.add("is-current");
+      bt.addEventListener("click", () => { state.page = page; render(); });
+      $pager.appendChild(bt);
+    }
+
+    addBtn("«", 1, state.page===1);
+    addBtn("‹", state.page-1, state.page===1);
+
+    const windowSize = 5;
+    let start = Math.max(1, state.page - Math.floor(windowSize/2));
+    let end = Math.min(pages, start + windowSize - 1);
+    start = Math.max(1, end - windowSize + 1);
+
+    for(let p = start; p <= end; p++){
+      addBtn(String(p), p, false, p===state.page);
+    }
+
+    addBtn("›", state.page+1, state.page===pages);
+    addBtn("»", pages, state.page===pages);
+  }
+
+  // -------- render principal --------
+  function render(){
+    const list = getFiltered();
+    renderFeature(list);
+    renderGrid(list);
+    renderPager(list.length);
+  }
+
+  // -------- eventos --------
+  $search.addEventListener("input", e => { state.q = e.target.value.trim(); state.page=1; render(); });
+  $sort.addEventListener("change", e => { state.sort = e.target.value; state.page=1; render(); });
+  $per.addEventListener("change", e => { state.per = parseInt(e.target.value,10)||9; state.page=1; render(); });
+
+  // -------- init --------
+  renderChips();
+  render();
+})();
+</script>

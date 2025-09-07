@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><?= pageTitle ?> — Secretaria — Governo do Estado do Piauí</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    <!-- Leaflet + MarkerCluster (CSS global para o SPA) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+
+    <style>
+  :root {
+    --blue: #0b1097;
+    --green: #56a134;
+    --yellow: #ffd500;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --steel: #e5e7eb;
+    --topbar: #efefef;
+    --container: 1200px;
+    --shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+  }
+  * { box-sizing: border-box; }
+  html { font-family: Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--ink); height: 100%; }
+  body { margin: 0; background: #fff; min-height: 100vh; display: flex; flex-direction: column; }
+  #miolo { flex: 1 0 auto; text-align: left; }
+  a { color: #0a489b; text-decoration: none; }
+  a:focus, button:focus { outline: 3px solid #ffd; outline-offset: 2px; }
+
+  .utility { background: var(--topbar); color: #000; font-size: 0.95rem; }
+  .utility a { color: #000; }
+  .utility .inner { max-width: var(--container); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; gap: 1rem; }
+  .utility .links, .utility .access { display: flex; gap: 1.2rem; align-items: center; }
+  .access button { border: 1px solid var(--steel); background: #fff; padding: 0.2rem 0.5rem; border-radius: 6px; cursor: pointer; }
+
+  header .inner { max-width: var(--container); margin: 0 auto; display: grid; grid-template-columns: 280px 1fr 220px; gap: 1.5rem; align-items: center; height: 115px; padding: 0 1rem; position: relative; }
+  .brand img { height: 90px; width: auto; }
+  .search { flex: 1; display: flex; justify-content: center; max-width: 600px; position: relative; }
+  .search input {
+    flex: 1; max-width: 600px; padding: 1.2rem 2.5rem 1.2rem 1rem; font-size: 1rem; font-family: "Montserrat", sans-serif; font-weight: 400;
+    border: 1px solid var(--steel); border-radius: 6px; background: #fff;
+  }
+  #btnBuscar {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    border: none; background: transparent; width: 36px; height: 36px; border-radius: 6px; cursor: pointer;
+    display: grid; place-items: center;
+  }
+  #btnBuscar:hover { background: #f1f5ff; }
+  #btnBuscar i { font-size: 18px; color: #0a489b; }
+
+  .btn-login { justify-self: end; background: #1050a0; color: #fff; border: none; border-radius: 10px; padding: 0.9rem 1.25rem; font-weight: 500; cursor: pointer; font-size: 0.95rem; font-family: "Montserrat", sans-serif; display: inline-flex; align-items: center; gap: 0.5rem; }
+  .btn-login:hover { background: #09306e; }
+  .btn-login .icon-exit { width: 20px; height: 20px; filter: brightness(0) invert(1); }
+
+  .nav { background: #0a489b; color: #fff; }
+  .nav .inner { max-width: var(--container); margin: 0 auto; display: flex; align-items: center; gap: 1rem; padding: 0 1rem; height: 68px; justify-content: center; }
+  .menu { display: flex; gap: 0.5rem; margin: 0; padding: 0; flex: 1 1 auto; justify-content: center; }
+  .menu > li { list-style: none; position: relative; }
+  .menu > li > a { color: #fff; display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 500; }
+  .menu > li > a:hover, .menu > li > a.active { background: rgba(255, 255, 255, 0.12); }
+  .submenu { display: none; position: absolute; left: 0; top: 100%; min-width: 220px; padding: 0.4rem 0; background: #0a489b; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; z-index: 20; }
+  .submenu a { display: block; color: #fff; padding: 0.5rem 0.75rem; border-radius: 4px; white-space: nowrap; }
+  .submenu a:hover { background: rgba(255, 255, 255, 0.12); }
+
+  @media (max-width: 980px) {
+    .nav .inner { height: auto; padding: 0.5rem 1rem; }
+    .menu { flex-wrap: wrap; justify-content: center; }
+    header .inner { grid-template-columns: 1fr; gap: 0.75rem; height: auto; padding: 1rem; }
+    .btn-login { justify-self: start; }
+  }
+
+  .container { max-width: var(--container); margin: 0 auto; padding: 1rem; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem; }
+  .card { background: #fff; border: 1px solid #e6edf8; border-radius: 12px; padding: 1rem; box-shadow: var(--shadow); }
+  .card h3 { margin: 0.25rem 0 0.5rem; }
+  .breadcrumb { font-size: 0.9rem; color: var(--muted); margin: 0.6rem auto 0; }
+  .breadcrumb, #miolo { max-width: var(--container); margin: 0 auto; padding: 0 1rem; text-align: left; }
+
+  .hero { max-width: var(--container); margin: 1rem auto 0; padding: 0 1rem; }
+  .carousel { position: relative; height: 420px; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+  .slide { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity 500ms ease; will-change: opacity; }
+  .slide.active { opacity: 1; pointer-events: auto; }
+  .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .caption {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 1rem;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 70%);
+    color: #fff; font-weight: 700; opacity: 0; transform: translateY(6px);
+    transition: opacity 420ms ease, transform 420ms ease;
+  }
+  .slide.active .caption { opacity: 1; transform: translateY(0); }
+  .dots { position: absolute; right: 12px; bottom: 12px; display: flex; gap: .4rem; z-index: 2; }
+  .dot  { width: 10px; height: 10px; border-radius: 50%; background: #fff; opacity: .5; cursor: pointer; }
+  .dot.active { opacity: 1; }
+
+  .gov-colors { width: 100%; height: 8px; background: linear-gradient(to right, #0a489b 0% 25%, #ffd500 25% 50%, #e53935 50% 75%, #56a134 75% 100%); margin: 0; flex-shrink: 0; }
+  footer { background: #0a489b; color: #fff; margin-top: 0; padding-top: 0; flex-shrink: 0; }
+  .footer-inner { max-width: var(--container); margin: 0 auto; padding: 3rem 1.5rem; display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 2rem; }
+  footer h4 { margin: 0 0 0.8rem; font-weight: 800; text-transform: uppercase; font-size: 1rem; }
+  footer a { color: #fff; }
+  .footer-brand { display: flex; align-items: center; gap: 0.75rem; }
+  .footer-brand img { height: 110px; width: auto; filter: brightness(0) invert(1); }
+  .divider { border-top: 1px solid rgba(255, 255, 255, 0.22); margin: 1rem 0; }
+  .govbar { background: #083b82; color: #e5e7eb; }
+  .govbar .inner { max-width: var(--container); margin: 0 auto; padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  @media (max-width: 980px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
+
+  .table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e6edf8; border-radius: 12px; overflow: hidden; }
+  .table th, .table td { padding: 0.75rem 0.9rem; border-top: 1px solid #eef2ff; text-align: left; }
+  .table th { background: #f7fbff; font-weight: 700; }
+
+  .hero { display: none; }
+  .page-home .hero { display: block; }
+
+  #miolo, #miolo * { overflow-wrap: anywhere; word-break: break-word; }
+  #miolo img, #miolo video, #miolo iframe { max-width: 100%; height: auto; display: block; }
+  #miolo table { width: 100%; overflow: auto; display: block; }
+  #miolo pre, #miolo code { white-space: pre-wrap; word-wrap: break-word; max-width: 100%; overflow: auto; }
+
+  html, body { overflow-x: hidden; }
+
+  .home-cards-bar {
+    position: sticky; bottom: 0; display: flex; justify-content: center; gap: 1rem;
+    padding: 1rem; background: #f7fbff; border-top: 1px solid #e6edf8; z-index: 10;
+  }
+  .home-cards-bar .card { flex: 1 1 220px; max-width: 260px; text-align: center; }
+
+  #searchResults {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(680px, 90vw);
+    background: #fff;
+    border: 1px solid #e6edf8;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    z-index: 50;
+    display: none;
+    max-height: 60vh;
+    overflow: auto;
+  }
+  #searchResults header {
+    padding: .7rem .9rem;
+    font-weight: 700;
+    border-bottom: 1px solid #eef2ff;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .sr-group { padding: .6rem .9rem .7rem; border-top: 1px solid #f1f5ff; }
+  .sr-group h5 { margin: 0 0 .4rem; font-size: .95rem; color: #0a489b; display:flex; align-items:center; gap:.45rem; }
+  .sr-item { padding: .35rem 0; font-size: .95rem; }
+  .sr-item a { color: inherit; }
+  .sr-empty { padding: .9rem; color: #64748b; }
+
+  /* ===== Modal Regularizômetro ===== */
+  .regz-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none; opacity: 0;
+    transition: opacity .2s ease;
+    z-index: 1000;
+  }
+  .regz-backdrop.open { display: block; opacity: 1; }
+
+  .regz-modal {
+    position: fixed; inset: 0;
+    display: grid; place-items: center;
+    pointer-events: none; z-index: 1001;
+  }
+  .regz-modal.open { pointer-events: auto; }
+
+  .regz-card {
+    width: min(720px, 92vw);
+    background: #fff; border: 1px solid #e6edf8; border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 1.25rem 1.25rem 1rem;
+    transform: translateY(12px) scale(.98); opacity: 0;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  .regz-modal.open .regz-card { transform: translateY(0) scale(1); opacity: 1; }
+
+  .regz-head {
+    display: grid;
+    grid-template-columns: 90px 1fr auto;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: .75rem;
+  }
+  .regz-logo { display:flex; align-items:center; }
+  .regz-logo img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+  }
+  @media (max-width: 520px){
+    .regz-head { grid-template-columns: 80px 1fr auto; }
+    .regz-logo img { width: 100px; height: 100px; }
+  }
+  .regz-title {
+    text-align: center;
+    font-weight: 800;
+    font-size: 2rem;
+    color:#0a489b;
+  }
+  .regz-actions { display:flex; gap:.5rem; justify-content:flex-end; }
+  .regz-actions button{
+    border:1px solid #e6edf8; background:#f7fbff; color:#0a489b; cursor:pointer;
+    border-radius: 8px; padding:.5rem .7rem; font-family: inherit; font-weight: 600;
+  }
+  .regz-actions button:hover{ background:#eef6ff; }
+
+  .regz-body { display:grid; gap:.75rem; }
+  .regz-kpis { display:flex; gap:1rem; flex-wrap:wrap; }
+  .regz-kpi{
+    flex:1 1 160px; min-width:160px; background:#f9fbff; border:1px solid #eef2ff;
+    border-radius:12px; padding:.75rem .9rem;
+  }
+  .regz-kpi small{ color:#64748b; font-weight:600; }
+  .regz-kpi strong{ display:block; font-size:1.3rem; margin-top:.25rem; }
+
+  .regz-bar{
+    margin-top:.25rem;
+    background:#eef2ff;
+    border-radius:999px;
+    height: 40px;
+    overflow:hidden;
+    border:1px solid #e6edf8;
+  }
+  .regz-bar > i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,#22c55e,#4ade80,#16a34a,#4ade80,#22c55e);
+    background-size: 200% 100%;
+    background-position: 0% 50%;
+    animation: shine 2s linear infinite;
+    transition: width 900ms cubic-bezier(.22,.8,.28,1);
+  }
+
+  @keyframes shine {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  .regz-foot{
+    display:flex; align-items:center; justify-content:space-between; gap:.75rem;
+    margin-top:.25rem; color:#64748b; font-size:.92rem;
+  }
+  .regz-foot a{ color:#0a489b; }
+
+  @media (prefers-reduced-motion: reduce){
+    .regz-card, .regz-bar > i { transition:none; transform:none; }
+  }
+
+  /* === Mapa dentro do Regularizômetro === */
+  #regzMap{
+    height: 48vh;
+    min-height: 330px;
+    border:1px solid #e6edf8;
+    border-radius:12px;
+    margin-top:.6rem;
+    overflow:hidden;
+  }
+    </style>
+  </head>
+
+  <body class="page-<?= page ?>">
+    <!-- ===== Regularizômetro: botão flutuante + modal ===== -->
+    <div style="position:fixed; right:14px; bottom:14px; z-index:900;">
+      <button id="btnOpenRegularizometro" title="Abrir Regularizômetro"
+        style="border:1px solid #e6edf8;background:#0a489b;color:#fff;border-radius:999px;padding:.6rem .9rem;font-weight:700;box-shadow:var(--shadow);cursor:pointer;">
+        Regularizômetro
+      </button>
+    </div>
+
+    <div id="regzBackdrop" class="regz-backdrop" aria-hidden="true"></div>
+    <div id="regzModal" class="regz-modal" role="dialog" aria-modal="true" aria-labelledby="regzTitle" aria-describedby="regzDesc">
+      <div class="regz-card">
+        <div class="regz-head">
+          <div class="regz-logo">
+            <img src="https://i.postimg.cc/3NHjKYHw/LOGO-CASA-LEGAL.png" alt="Logo do Programa" />
+          </div>
+          <div class="regz-title">
+            <span id="regzTitle">Regularizômetro</span>
+          </div>
+          <div class="regz-actions">
+            <button id="regzClose" type="button" title="Fechar">Fechar</button>
+          </div>
+        </div>
+
+        <div id="regzDesc" class="regz-body">
+          <div class="regz-kpis">
+            <div class="regz-kpi">
+              <small>Meta até 2026</small>
+              <strong id="regzMeta">–</strong>
+            </div>
+            <div class="regz-kpi">
+              <small>Alcançado</small>
+              <strong id="regzAtual">–</strong>
+            </div>
+            <div class="regz-kpi">
+              <small>Progresso</small>
+              <strong><span id="regzPerc">0</span>%</strong>
+            </div>
+          </div>
+
+          <div class="regz-bar"><i id="regzBar"></i></div>
+
+          <!-- Mapa dentro do modal -->
+          <div id="regzMap" role="region" aria-label="Mapa de atuação (Regularizômetro)"></div>
+        </div>
+
+        <div class="regz-foot">
+          <div>Atualizado em <span id="regzUpdated">–</span></div>
+          <div><a id="regzSheetLink" href="#" target="_blank" rel="noopener" style="display:none;"></a></div>
+        </div>
+      </div>
+    </div>
+    <!-- ===== /Regularizômetro ===== -->
+
+    <!-- Top bar -->
+    <div class="utility" role="region" aria-label="Barra superior">
+      <div class="inner">
+        <div class="links">
+          <a class="chip" href="#acessibilidade">Acessibilidade</a><span>|</span>
+          <a class="chip" href="?page=mapa-do-site">Mapa do site</a>
+        </div>
+        <div class="access" id="barraAcessibilidade">
+          <button id="btnContraste" aria-pressed="false" title="Alternar alto contraste">◐</button>
+          <button id="fontMenos" title="Diminuir fonte">A-</button>
+          <button id="fontMais" title="Aumentar fonte">A+</button>
+        </div>
+        <div class="links">
+          <a class="chip" href="https://transparencia.pi.gov.br/ords/f?p=101:1::::::" target="_blank" rel="noopener">Portal da transparência</a>
+          <span>|</span>
+          <a class="chip" href="https://www.pi.gov.br/" target="_blank" rel="noopener">Governo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header role="banner">
+      <div class="inner">
+        <div class="brand">
+          <img src="https://i.postimg.cc/3NHjKYHw/LOGO-CASA-LEGAL.png" alt="Governo do Piauí" width="200" height="90" loading="lazy" onerror="this.style.display='none'" />
+        </div>
+        <div class="search" role="search" aria-label="Busca no portal">
+          <input id="buscaSite" type="search" placeholder="O que você procura?" aria-label="Buscar no site" />
+          <button id="btnBuscar" aria-label="Buscar"><i class="bi bi-search"></i></button>
+          <div id="searchResults" role="listbox" aria-label="Resultados da busca"></div>
+        </div>
+        <a class="btn-login" href="https://pidigital.pi.gov.br/app/catalog" target="_blank" rel="noopener">
+          Gov.Pi Cidadão
+          <img src="https://i.postimg.cc/kgn27D6Z/Superintend-ncia-de-Patrim-nio-Imobili-rio-SEAD-1.png" alt="Entrar" class="icon-exit" width="20" height="20" loading="lazy" />
+        </a>
+      </div>
+    </header>
+
+    <!-- Nav -->
+    <nav class="nav" aria-label="Menu principal">
+      <div class="inner">
+        <ul class="menu" id="mainMenu">
+          <li><a href="?page=home">Início</a></li>
+          <li><a href="?page=quem-somos">Quem Somos</a></li>
+          <li><a href="?page=noticias">Notícias</a></li>
+          <li><a href="https://transparencia.pi.gov.br/ords/f?p=101:1::::::" target="_blank" rel="noopener">Transparência</a></li>
+          <li><a href="https://majestic-duckanoo-b4cb2b.netlify.app/" target="_blank" rel="noopener">Resultados</a></li>
+          
+
+          <!-- Botão no menu que abre o Regularizômetro -->
+          <li><a href="#" id="btnRegularizometro">Regularizômetro</a></li>
+
+          <li>
+            <a href="?page=casa-legal" aria-haspopup="true" aria-expanded="false">Casa Legal <span class="chev">▾</span></a>
+          <div class="submenu" role="menu">
+             <a href="?page=como-participar" role="menuitem">Como Participar</a>
+             <a href="?page=sobre-o-programa" role="menuitem">Sobre o Programa</a>
+             <a href="?page=decretos" role="menuitem">Decretos</a>
+          </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="breadcrumb">
+      <div class="container" style="padding-left: 0; padding-right: 0">
+        <span><a href="?page=home">Início</a></span> ›
+        <span><?= pageTitle ?></span>
+      </div>
+    </nav>
+
+    <!-- Miolo dinâmico -->
+    <main id="miolo" class="container" aria-live="polite" aria-busy="false"></main>
+
+    <!-- Barra 4 cores + Rodapé -->
+    <div class="gov-colors" aria-hidden="true"></div>
+    <footer role="contentinfo" aria-label="Rodapé institucional">
+      <div class="footer-inner">
+        <div>
+          <div class="footer-brand">
+            <img src="https://piauioportunidades.pi.gov.br/wp-content/uploads/2024/08/gov.pi-logo.png" alt="Governo do Piauí" />
+            <div>
+              <strong>Secretaria da Administração — SEAD</strong><br />
+              <span class="small">Governo do Estado do Piauí</span>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="small">Endereço • CEP • Teresina — PI • Telefone</div>
+        </div>
+        <div>
+          <h4>Institucional</h4>
+          <ul class="footer-list">
+            <li><a href="?page=quem-somos">Quem somos</a></li>
+            <li><a href="?page=institucional#unidades">Unidades e contatos</a></li>
+            <li><a href="?page=institucional#agenda">Agenda da autoridade</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Transparência</h4>
+          <ul class="footer-list">
+            <li><a href="https://transparencia.pi.gov.br/ords/f?p=101:1::::::" target="_blank" rel="noopener">Portal da Transparência</a></li>
+            <li><a href="?page=lgpd">LGPD</a></li>
+            <li><a href="?page=contato#ouvidoria">Ouvidoria / e-SIC</a></li>
+            <li><a href="?page=editais#despesas">Receitas e Despesas</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Serviços</h4>
+          <ul class="footer-list">
+            <li><a href="?page=portais#portal-servidor">Portal do Servidor</a></li>
+            <li><a href="?page=editais#licitacoes">Licitações e Contratos</a></li>
+            <li><a href="?page=portais#sei">Acesso ao SEI</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="govbar">
+        <div class="inner">
+          <div>© Governo do Estado do Piauí — Todos os direitos reservados</div>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap">
+            <a href="#mapa">Mapa do site</a>
+            <a href="?page=lgpd#politica">Política de Privacidade</a>
+            <a href="#acessibilidade">Acessibilidade</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Script 1: acessibilidade + menu -->
+    <script>
+      (function () {
+        const root = document.documentElement;
+        let base = 100;
+        document.getElementById("fontMais").addEventListener("click", () => {
+          base = Math.min(base + 10, 160);
+          root.style.fontSize = base + "%";
+        });
+        document.getElementById("fontMenos").addEventListener("click", () => {
+          base = Math.max(base - 10, 80);
+          root.style.fontSize = base + "%";
+        });
+        const contraste = document.getElementById("btnContraste");
+        contraste.addEventListener("click", () => {
+          const p = contraste.getAttribute("aria-pressed") === "true";
+          contraste.setAttribute("aria-pressed", String(!p));
+          document.body.classList.toggle("contrast");
+        });
+      })();
+
+      (function () {
+        document.querySelectorAll(".menu > li").forEach((li) => {
+          const link = li.querySelector(":scope > a");
+          const submenu = li.querySelector(".submenu");
+          if (!submenu || !link) return;
+          const open = () => { submenu.style.display = "block"; link.setAttribute("aria-expanded", "true"); };
+          const close = () => { submenu.style.display = "none"; link.setAttribute("aria-expanded", "false"); };
+          li.addEventListener("mouseenter", open);
+          li.addEventListener("mouseleave", close);
+          link.addEventListener("focus", open);
+          submenu.addEventListener("focusout", (e) => { if (!li.contains(e.relatedTarget)) close(); });
+          li.addEventListener("keydown", (e) => { if (e.key === "Escape") { close(); link.focus(); } });
+          link.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              const isOpen = link.getAttribute("aria-expanded") === "true";
+              isOpen ? close() : open();
+            }
+          });
+        });
+      })();
+    </script>
+
+    <!-- Script 1.5: BUSCA + registro de páginas -->
+    <script>
+    (function(){
+      const input = document.getElementById('buscaSite');
+      const btn = document.getElementById('btnBuscar');
+      const results = document.getElementById('searchResults');
+      const miolo = document.getElementById('miolo');
+      if (!input || !btn || !results || !miolo) return;
+
+      window.__siteSearchLastTerm = '';
+      window.__pendingScrollTopicText = '';
+
+      window.PAGES = {
+        home: { file: "home.html", title: "Início" },
+        "quem-somos": { file: "quem-somos.html", title: "Quem somos" },
+        noticias: { file: "noticias.html", title: "Notícias" },
+        "casa-legal": { file: "casa-legal.html", title: "Casa Legal" },
+        "mapa-do-site":  { file: "mapa-do-site.html", title: "Mapa do site" },
+        "como-participar": { file: "como-participar.html", title: "Como participar" },
+        "sobre-o-programa": { file: "sobre-o-programa.html", title: "Sobre o Programa" },
+        decretos:        { file: "decretos.html", title: "Decretos" }
+      };
+
+      const norm = (s) => (s || '').toString()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase().trim();
+
+      const TOPIC_SELECTORS = [
+        'h1','h2','h3',
+        '.qs-card > h3',
+        '.bio-right > h2',
+        '.news-item h3','.noticia h3','.noticias h3',
+        '[data-topic]'
+      ].join(',');
+
+      const TOPIC_INDEX = {};
+      let indexReady = false;
+
+      async function buildTopicIndex(){
+        if (indexReady) return;
+        const entries = Object.entries(window.PAGES);
+        await Promise.all(entries.map(async ([key, meta]) => {
+          try {
+            const res = await fetch(meta.file, { cache: 'no-cache' });
+            if (!res.ok) throw new Error(res.status);
+            const html = await res.text();
+            const div = document.createElement('div');
+            div.innerHTML = html;
+
+            const topics = [];
+            div.querySelectorAll(TOPIC_SELECTORS).forEach(el=>{
+              const text = (el.textContent || '').trim();
+              if (!text) return;
+              const id = el.getAttribute('id') || '';
+              const item = {
+                text,
+                textNorm: norm(text),
+                id,
+                hash: id ? `#${id}` : '',
+                pageKey: key,
+                pageTitle: meta.title
+              };
+              topics.push(item);
+            });
+
+            TOPIC_INDEX[key] = topics;
+          } catch(e){
+            console.warn('Falha ao indexar tópicos de', key, e);
+            TOPIC_INDEX[key] = [];
+          }
+        }));
+        indexReady = true;
+      }
+
+      function renderResults(term){
+        const tnorm = norm(term);
+        if (!tnorm) { results.style.display = 'none'; results.innerHTML=''; return; }
+
+        const groups = [];
+        Object.entries(TOPIC_INDEX).forEach(([key, arr])=>{
+          const items = arr.filter(it => it.textNorm.includes(tnorm));
+          if (items.length){
+            groups.push({
+              pageKey: key,
+              pageTitle: (window.PAGES[key]?.title || key),
+              items
+            });
+          }
+        });
+
+        if (!groups.length){
+          results.innerHTML = `<div class="sr-empty">Nenhum tópico encontrado para <strong>${term}</strong>.</div>`;
+          results.style.display = 'block';
+          return;
+        }
+
+        const html = [
+          `<header><i class="bi bi-search"></i> Tópicos em “${term}”</header>`,
+          ...groups.map(g => `
+            <div class="sr-group">
+              <h5><i class="bi bi-file-earmark-text"></i> ${g.pageTitle} <span style="font-weight:400;color:#64748b">(${g.items.length})</span></h5>
+              ${g.items.map(it => `
+                <div class="sr-item">
+                  <a href="?page=${g.pageKey}${it.hash}" class="sr-link" data-goto="${g.pageKey}" data-topic="${encodeURIComponent(it.text)}" data-hash="${it.hash}">
+                    ${it.text}
+                  </a>
+                </div>
+              `).join('')}
+            </div>
+          `)
+        ].join('');
+        results.innerHTML = html;
+        results.style.display = 'block';
+      }
+
+      function runSearch(){
+        const val = input.value || '';
+        window.__siteSearchLastTerm = val;
+        buildTopicIndex().then(()=> renderResults(val));
+      }
+      input.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter') { e.preventDefault(); runSearch(); }
+      });
+      btn.addEventListener('click', runSearch);
+
+      results.addEventListener('click', (e)=>{
+        const a = e.target.closest('a.sr-link');
+        if (!a) return;
+        e.preventDefault();
+        const key = a.getAttribute('data-goto');
+        const topicText = decodeURIComponent(a.getAttribute('data-topic') || '');
+        const hash = a.getAttribute('data-hash') || '';
+
+        window.__pendingScrollTopicText = topicText;
+
+        const url = new URL(`?page=${key}${hash}`, location.href);
+        history.pushState({}, "", url.href);
+        if (window.__triggerRouterReload) window.__triggerRouterReload();
+
+        results.style.display = 'none';
+      });
+
+      document.addEventListener('click', (e)=>{
+        if (!results.contains(e.target) && !input.contains(e.target) && e.target !== btn) {
+          results.style.display = 'none';
+        }
+      });
+
+      window.applySiteSearch = function(){
+        const term = window.__siteSearchLastTerm || '';
+        if (!term) return;
+
+        const h = location.hash.replace('#','');
+        if (h) {
+          const el = document.getElementById(h);
+          if (el) { el.scrollIntoView({behavior:'smooth', block:'start'}); }
+          return;
+        }
+
+        if (window.__pendingScrollTopicText) {
+          const tnorm = (window.__pendingScrollTopicText||'').toLowerCase();
+          const candidates = document.querySelectorAll('h1,h2,h3,.qs-card>h3,.bio-right>h2,[data-topic]');
+          for (const el of candidates) {
+            if ((el.textContent||'').toLowerCase().trim() === tnorm) {
+              el.scrollIntoView({behavior:'smooth', block:'start'});
+              break;
+            }
+          }
+          window.__pendingScrollTopicText = '';
+        }
+      };
+    })();
+    </script>
+
+    <!-- Script 2: ROUTER (carrega páginas no #miolo e ativa menu) -->
+    <script>
+      (function () {
+        const miolo = document.getElementById("miolo");
+        const breadcrumb =
+          document.querySelector(".breadcrumb .container") ||
+          document.querySelector(".breadcrumb");
+        const titleEl = document.querySelector("title");
+
+        const PAGES = window.PAGES || {
+          home: { file: "home.html", title: "Início" },
+          "quem-somos": { file: "quem-somos.html", title: "Quem somos" },
+          noticias: { file: "noticias.html", title: "Notícias" },
+          "casa-legal": { file: "casa-legal.html", title: "Casa Legal" }
+        };
+
+        function getPageFromURL() {
+          const q = new URLSearchParams(location.search);
+          const p = (q.get("page") || "home").toLowerCase();
+          return PAGES[p] ? p : "home";
+        }
+
+        function hydrateScripts(container) {
+          const scripts = container.querySelectorAll("script");
+          scripts.forEach((old) => {
+            const s = document.createElement("script");
+            for (const { name, value } of [...old.attributes]) {
+              s.setAttribute(name, value);
+            }
+            if (old.textContent) s.textContent = old.textContent;
+            old.replaceWith(s);
+          });
+        }
+
+        async function loadPage(p) {
+          const meta = PAGES[p];
+          try {
+            miolo.setAttribute("aria-busy", "true");
+            const res = await fetch(meta.file, { cache: "no-cache" });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const html = await res.text();
+
+            miolo.innerHTML = html;
+
+            setBodyPageClass(p);
+            hydrateScripts(miolo);
+
+            if (window.applySiteSearch) window.applySiteSearch();
+
+            if (breadcrumb) {
+              const spans = breadcrumb.querySelectorAll("span");
+              if (spans.length >= 2) spans[1].textContent = meta.title;
+            }
+            if (titleEl) {
+              titleEl.textContent = `${meta.title} — Secretaria — Governo do Piauí`;
+            }
+
+            document.querySelectorAll(".menu > li > a").forEach((a) => {
+              const href = a.getAttribute("href") || "";
+              if (!href.includes("?page=")) {
+                a.classList.remove("active");
+                return;
+              }
+              const u = new URL(href, location.href);
+              const target = new URLSearchParams(u.search).get("page") || "home";
+              a.classList.toggle("active", target === p);
+            });
+          } catch (e) {
+            console.error("Falha ao carregar página:", e);
+            miolo.innerHTML = `
+              <div class="card">
+                <h3>Conteúdo indisponível</h3>
+                <p>Não foi possível carregar <code>${meta.file}</code>.</p>
+              </div>`;
+          } finally {
+            miolo.setAttribute("aria-busy", "false");
+          }
+        }
+
+        document.addEventListener("click", (e) => {
+          const a = e.target.closest("a[href]");
+          if (!a) return;
+          const url = new URL(a.getAttribute("href"), location.href);
+          if (url.origin === location.origin && url.searchParams.has("page")) {
+            e.preventDefault();
+            history.pushState({}, "", url.href);
+            loadPage(getPageFromURL());
+          }
+        });
+
+        window.addEventListener("popstate", () => loadPage(getPageFromURL()));
+
+        window.__triggerRouterReload = () => loadPage(getPageFromURL());
+
+        loadPage(getPageFromURL());
+      })();
+
+      function setBodyPageClass(p) {
+        document.body.className = (document.body.className || "")
+          .split(/\s+/)
+          .filter(c => !/^page-/.test(c))
+          .concat(`page-${p}`)
+          .join(" ")
+          .trim();
+      }
+    </script>
+
+    <!-- Script 3: Regularizômetro (KPIs da Planilha Google + MAPA local no modal) -->
+<script>
+(function(){
+  // ======= KPIs (Planilha Google) =======
+  const SHEET_ID   = '1xn97o-p3vVDaXkpm1wQU0zZaJtlAeeHZqyIdOHHUTTA'; // <— mantenha/ajuste
+  const SHEET_NAME = 'Regularizometro';                               // <— mantenha/ajuste
+  let   CSV_URL    = ''; // Se você já publicou a aba como CSV, cole aqui a URL completa do CSV
+  if (!CSV_URL && SHEET_ID && SHEET_NAME) {
+    CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+  }
+
+  // ======= MAPA (arquivos locais) =======
+  const POINTS_GEOJSON_URL     = "./pontos.json";       // obrigatório p/ pinos
+  const MUNICIPIOS_GEOJSON_URL = "./municipios.json";   // opcional (se não usar SHP)
+  const SHP_ZIP_URL            = ""; // ex: "./PI_Municipios_2024.zip" (requer shp.min.js já incluído)
+
+  // ======= DOM =======
+  const $modal   = document.getElementById('regzModal');
+  const $back    = document.getElementById('regzBackdrop');
+  const $btnFloat= document.getElementById('btnOpenRegularizometro');
+  const $btnMenu = document.getElementById('btnRegularizometro');
+  const $btnClose= document.getElementById('regzClose');
+
+  const $meta  = document.getElementById('regzMeta');
+  const $atual = document.getElementById('regzAtual');
+  const $perc  = document.getElementById('regzPerc');
+  const $bar   = document.getElementById('regzBar');
+  const $upd   = document.getElementById('regzUpdated');
+  const $link  = document.getElementById('regzSheetLink');
+
+  // ======= Utils UI =======
+  const br = (n)=> Number(n||0).toLocaleString('pt-BR');
+  const clamp = (v,min,max)=> Math.max(min, Math.min(max, v));
+  function openModal(){ $back.classList.add('open'); $modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeModal(){ $back.classList.remove('open'); $modal.classList.remove('open'); document.body.style.overflow = ''; }
+  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeModal(); });
+
+  // tenta converter string em Date priorizando formato brasileiro
+function parseDateSmart(v){
+  if (!v) return null;
+  const s = String(v).trim();
+
+  // DD/MM/YYYY (com ou sem hora)
+  let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (m){
+    const [ , d, mo, y, hh='00', mm='00', ss='00' ] = m;
+    const dt = new Date(Number(y), Number(mo)-1, Number(d), Number(hh), Number(mm), Number(ss));
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+
+  // YYYY-MM-DD (com ou sem hora)
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m){
+    const [ , y, mo, d, hh='00', mm='00', ss='00' ] = m;
+    const dt = new Date(Number(y), Number(mo)-1, Number(d), Number(hh), Number(mm), Number(ss));
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+
+  // fallback: deixe o motor do navegador tentar
+  const dt = new Date(s);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
+// EXIBE sempre como dd/mm/aaaa hh:mm
+function guessUpdateLabel(v){
+  const dt = parseDateSmart(v);
+  if (!dt) return v || '–';
+  const data = dt.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const hora = dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  return `${data} ${hora}`;
+}
+
+  function animateNumber($el, to){
+    const from = Number(($el.textContent||'').replace(/[^\d]/g,'')) || 0;
+    const dur = 700, start = performance.now();
+    function frame(t){
+      const k = clamp((t - start)/dur, 0, 1);
+      const val = Math.round(from + (to - from)*k);
+      $el.textContent = val.toLocaleString('pt-BR');
+      if (k < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  function updateUI({meta, atual, atualizado_em}){
+    const m = Number(meta||0);
+    const a = Number(atual||0);
+    const pct = m > 0 ? clamp((a/m)*100, 0, 100) : 0;
+    $meta.textContent = br(m);
+    $atual.textContent = br(a);
+    $upd.textContent = guessUpdateLabel(atualizado_em);
+    animateNumber($perc, Math.round(pct));
+    requestAnimationFrame(()=>{ $bar.style.width = pct + '%'; });
+  }
+
+  // ======= CSV (planilha Google) =======
+  function csvToRows(csv){
+    const lines = csv.trim().split(/\r?\n/);
+    return lines.map(l=>{
+      const out = []; let cur='', q=false;
+      for (let i=0;i<l.length;i++){
+        const ch = l[i];
+        if (ch === '"'){
+          if (q && l[i+1] === '"'){ cur+='"'; i++; } else q=!q;
+        } else if (ch === ',' && !q){
+          out.push(cur); cur='';
+        } else cur += ch;
+      }
+      out.push(cur);
+      return out;
+    });
+  }
+  async function fetchSheet(){
+    if (!CSV_URL) throw new Error('CSV_URL não configurada');
+    const res = await fetch(CSV_URL, { cache:'no-cache' });
+    if (!res.ok) throw new Error('Falha ao baixar CSV');
+    const csv = await res.text();
+    const rows = csvToRows(csv);
+    if (!rows.length) throw new Error('CSV vazio');
+
+    const head = rows[0].map(h => (h||'').trim().toLowerCase());
+    const iAtual = head.findIndex(h => ['atual','alcançado','alcancado','valor','progresso'].includes(h));
+    const iMeta  = head.findIndex(h => ['meta','total','objetivo'].includes(h));
+    const iUpd   = head.findIndex(h => ['atualizado_em','atualizacao','atualizado','updated','last_update','data'].includes(h));
+
+    const row = rows[1] || [];
+    const atual = iAtual>=0 ? row[iAtual] : row[0];
+    const meta  = iMeta >=0 ? row[iMeta]  : row[1];
+    const atualizado_em = iUpd>=0 ? row[iUpd] : '';
+
+    const normNum = (v)=> String(v??'').replace(/[^\d.,-]/g,'').replace(/\./g,'').replace(',', '.');
+
+    return { meta: normNum(meta), atual: normNum(atual), atualizado_em };
+  }
+
+  // ======= MAPA no modal (Leaflet) =======
+  let regzMap=null, regzCluster=null, regzMuniLayer=null, regzMapBooted=false;
+
+  function numBRtoFloat(v){
+    const s = String(v || '').replace(/\s+/g,'').replace(/\./g,'').replace(',', '.');
+    const f = parseFloat(s);
+    return isNaN(f) ? null : f;
+  }
+  function addPointFeature(f){
+    if(!f) return;
+    let latlng=null, props=f.properties||{};
+    if (f.geometry && f.geometry.type === "Point") {
+      const [lo, la] = f.geometry.coordinates || [];
+      if (typeof la === "number" && typeof lo === "number") latlng=[la, lo];
+    } else if (props.lat && props.lon) {
+      const la=numBRtoFloat(props.lat), lo=numBRtoFloat(props.lon);
+      if (la!=null && lo!=null) latlng=[la, lo];
+    }
+    if (!latlng) return;
+    const nome   = props.municipio || props.nome || "Município";
+    const status = props.status || "";
+    const info   = props.info   || "";
+    const marker = L.marker(latlng, { title: nome });
+    marker.bindPopup(`<strong>${nome}</strong>${status?`<br><small>Status:</small> ${status}`:''}${info?`<br>${info}`:''}`);
+    regzCluster.addLayer(marker);
+  }
+  async function loadLocalPoints(){
+    if(!POINTS_GEOJSON_URL) return;
+    const r = await fetch(POINTS_GEOJSON_URL, { cache:'no-cache' });
+    if(!r.ok) throw new Error("pontos.json não encontrado");
+    const data = await r.json();
+    if (Array.isArray(data)) {
+      data.forEach(obj => addPointFeature({ properties: obj }));
+    } else if (data.type === "FeatureCollection") {
+      (data.features||[]).forEach(addPointFeature);
+    } else if (data.type === "Feature") {
+      addPointFeature(data);
+    }
+  }
+  async function loadMunicipios(){
+    if (MUNICIPIOS_GEOJSON_URL) {
+      const r = await fetch(MUNICIPIOS_GEOJSON_URL, { cache:'no-cache' });
+      if(!r.ok) throw new Error("municipios.json não encontrado");
+      const gj = await r.json();
+      if (regzMuniLayer) regzMap.removeLayer(regzMuniLayer);
+      regzMuniLayer = L.geoJSON(gj, {
+        style: ()=>({ color:'#0a489b', weight:1, opacity:.85, fillColor:'#4ade80', fillOpacity:.12 })
+      }).addTo(regzMap);
+    } else if (SHP_ZIP_URL && window.shp) {
+      const gj = await shp(SHP_ZIP_URL);
+      const fc = (gj.type === 'FeatureCollection' || gj.type === 'Feature')
+        ? gj
+        : { type:'FeatureCollection', features:Object.values(gj).flatMap(g => g.features || []) };
+      if (regzMuniLayer) regzMap.removeLayer(regzMuniLayer);
+      regzMuniLayer = L.geoJSON(fc, {
+        style: ()=>({ color:'#0a489b', weight:1, opacity:.85, fillColor:'#4ade80', fillOpacity:.12 })
+      }).addTo(regzMap);
+    }
+  }
+  function initRegzMapOnce(){
+    if (regzMapBooted) return;
+    const el = document.getElementById('regzMap');
+    if (!el) return;
+
+    regzMap = L.map(el, { zoomControl:true, minZoom:5, maxZoom:19 });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      { maxZoom:20, attribution:'© OpenStreetMap · © Carto' }).addTo(regzMap);
+
+    const piauiBounds = L.latLngBounds(L.latLng(-10.5,-45.0), L.latLng(-2.5,-40.0));
+    regzMap.fitBounds(piauiBounds);
+
+    regzCluster = L.markerClusterGroup({ showCoverageOnHover:false });
+    regzMap.addLayer(regzCluster);
+
+    loadMunicipios().catch(console.warn);
+    loadLocalPoints()
+      .then(()=>{ try{ regzMap.fitBounds(regzCluster.getBounds().pad(0.08)); }catch{} })
+      .catch(console.warn);
+
+    regzMapBooted = true;
+  }
+
+  async function openAndFetch(){
+    openModal();
+
+    // KPIs da planilha
+    fetchSheet()
+      .then(data=>{
+        updateUI(data);
+        // Link para a planilha (opcional)
+        if (CSV_URL.includes('/gviz/')) {
+          $link.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=0`;
+        } else {
+          $link.href = CSV_URL || '#';
+        }
+        $link.style.display = 'inline';
+      })
+      .catch(err=>{
+        console.warn('Regularizômetro (planilha): fallback demonstrativo. Motivo:', err);
+        updateUI({ meta: 5000, atual: 1200, atualizado_em: new Date().toISOString() });
+        $link.style.display = 'none';
+      });
+
+    // garante o mapa após o modal abrir
+    setTimeout(()=>{
+      initRegzMapOnce();
+      try { regzMap.invalidateSize(true); } catch(e){}
+    }, 80);
+  }
+
+  // Eventos de abrir/fechar
+  $btnFloat?.addEventListener('click', (e)=>{ e.preventDefault(); openAndFetch(); });
+  $btnMenu?.addEventListener('click',  (e)=>{ e.preventDefault(); openAndFetch(); });
+  $btnClose?.addEventListener('click', closeModal);
+  $back?.addEventListener('click', closeModal);
+
+    // sempre abrir o Regularizômetro ao carregar o site
+  document.addEventListener("DOMContentLoaded", () => {
+    openAndFetch();
+  });
+
+})();
+</script>
+
+    </script>
+
+    <!-- Leaflet + MarkerCluster (JS global para o SPA) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <!-- (opcional) suporte a SHP .zip -->
+    <script src="https://unpkg.com/shpjs@latest/dist/shp.min.js"></script>
+
+    <!-- Helper: garante altura do #map quando a rota carregar a página mapa.html -->
+    <script>
+      (function(){
+        const obs = new MutationObserver(() => {
+          const mapEl = document.querySelector('#miolo #map');
+          if (mapEl && !mapEl.style.height) mapEl.style.height = '72vh';
+        });
+        obs.observe(document.getElementById('miolo'), { childList:true, subtree:true });
+      })();
+    </script>
+  </body>
+</html>
