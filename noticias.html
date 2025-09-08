@@ -1,4 +1,4 @@
-  <!-- noticias.html -->
+<!-- noticias.html -->
 <style>
   .nt-wrap { display: grid; gap: 1.25rem; }
   .nt-lead { max-width: 75ch; color: var(--muted); line-height: 1.7; }
@@ -11,36 +11,29 @@
   .nt-chip.is-active { background: var(--blue); color:#fff; border-color: var(--blue); }
 
   .nt-feature { display: grid; gap: 1rem; grid-template-columns: 1.3fr .7fr; align-items: start; }
-  .nt-feature figure { 
-    margin:0; 
-    border:1px solid #e6edf8; 
-    border-radius:12px; 
-    overflow:hidden; 
-    box-shadow: var(--shadow); 
-    background:#fff;
-    aspect-ratio: 16 / 9; /* <<< padroniza destaque */
+  .nt-feature figure {
+    margin:0; border:1px solid #e6edf8; border-radius:12px; overflow:hidden;
+    box-shadow: var(--shadow); background:#fff; aspect-ratio: 16 / 9;
   }
-  .nt-feature img { 
-    display:block; 
-    width:100%; 
-    height:100%; 
-    object-fit:cover; 
-  }
+  .nt-feature img { display:block; width:100%; height:100%; object-fit:cover; }
 
   .nt-meta { display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; font-size:.9rem; color:var(--muted); }
   .nt-tag { display:inline-block; padding:.2rem .5rem; font-size:.75rem; border:1px solid #e6edf8; border-radius:999px; background:#fff; }
 
   .nt-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; }
-  .nt-card { background:#fff; border:1px solid #e6edf8; border-radius:12px; overflow:hidden; box-shadow: var(--shadow); display:flex; flex-direction:column; }
-  .nt-card img { 
-    width:100%; 
-    aspect-ratio: 16 / 9; /* <<< padroniza cards */
-    object-fit:cover; 
-    display:block; 
+  .nt-card {
+    background:#fff; border:1px solid #e6edf8; border-radius:12px; overflow:hidden;
+    box-shadow: var(--shadow); display:flex; flex-direction:column;
   }
-  .nt-card .nt-body { padding:.9rem 1rem; display:grid; gap:.4rem; }
+  .nt-card img { width:100%; aspect-ratio: 16 / 9; object-fit:cover; display:block; }
+  .nt-card .nt-body {
+    padding:.9rem 1rem; display:flex; flex-direction:column; gap:.4rem; flex:1;
+  }
   .nt-card h3 { margin:.1rem 0; font-size:1.02rem; line-height:1.25; }
   .nt-card p { margin:0; color: var(--muted); }
+  .nt-card .nt-body .nt-link {
+    margin-top:auto; align-self:flex-start;   /* mantém o botão na base do card */
+  }
   .nt-link { display:inline-block; padding:.45rem .7rem; border-radius:10px; text-decoration:none; border:1px solid #e6edf8; background:#f7fbff; }
   .nt-link:hover { border-color: var(--blue); }
 
@@ -51,15 +44,14 @@
   .nt-wrap, .nt-wrap * { overflow-wrap:anywhere; word-break:break-word; }
 
   @media (max-width:1080px){
-    .nt-feature{ grid-template-columns:1fr; } 
-    .nt-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } 
+    .nt-feature{ grid-template-columns:1fr; }
+    .nt-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
   }
-  @media (max-width:680px){ 
-    .nt-toolbar{ grid-template-columns:1fr; } 
-    .nt-grid{ grid-template-columns: 1fr; } 
-    .nt-card img, .nt-feature figure { aspect-ratio: 4 / 3; } /* <<< ajusta em telas pequenas */
+  @media (max-width:680px){
+    .nt-toolbar{ grid-template-columns:1fr; }
+    .nt-grid{ grid-template-columns: 1fr; }
+    .nt-card img, .nt-feature figure { aspect-ratio: 4 / 3; }
   }
-
 </style>
 
 <h1 style="color: #1050a0;">Notícias</h1>
@@ -101,8 +93,6 @@
 
 <script type="module">
 (function () {
-  console.log("noticias: script executou");
-
   // -------- DADOS (exemplo). Troque pelos reais --------
   const posts = [
     {
@@ -159,6 +149,8 @@
       image: "https://www.pi.gov.br/wp-content/uploads/2025/04/19cc4c2a-6eac-4e4e-970f-526715f604f5-2048x1365.jpeg",
       url: "https://www.pi.gov.br/prourbe-sead-vai-regularizar-mais-de-2-mil-imoveis-no-municipio-de-piripiri/"
     }
+    
+    
   ];
 
   // -------- utilitários --------
@@ -166,7 +158,11 @@
 
   function fixImageURL(url) {
     if (!url) return url;
-    try { const u = new URL(url, location.href); if (u.protocol === "http:") u.protocol = "https:"; url = u.toString(); } catch {}
+    try {
+      const u = new URL(url, location.href);
+      if (u.protocol === "http:") u.protocol = "https:";
+      url = u.toString();
+    } catch {}
     const driveIdMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
     if (driveIdMatch && driveIdMatch[1]) return `https://drive.google.com/uc?export=view&id=${driveIdMatch[1]}`;
     const imgurMatch = url.match(/^https?:\/\/imgur\.com\/([A-Za-z0-9]+)$/);
@@ -267,7 +263,7 @@
           </div>
           <h3>${p.title}</h3>
           <p>${p.excerpt}</p>
-          <p><a class="nt-link" target="_blank" rel="noopener" href="${p.url || '#'}">Saiba mais</a></p>
+          <a class="nt-link" target="_blank" rel="noopener" href="${p.url || '#'}">Saiba mais</a>
         </div>
       </article>
     `).join("");
