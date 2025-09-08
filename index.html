@@ -301,7 +301,7 @@
         <div id="regzDesc" class="regz-body">
           <div class="regz-kpis">
             <div class="regz-kpi">
-              <small>Meta até 2026</small>
+              <small>Meta até dez/2026</small>
               <strong id="regzMeta">–</strong>
             </div>
             <div class="regz-kpi">
@@ -385,7 +385,7 @@
           <div class="submenu" role="menu">
              <a href="?page=como-participar" role="menuitem">Como Participar</a>
              <a href="?page=sobre-o-programa" role="menuitem">Sobre o Programa</a>
-             <a href="?page=decretos" role="menuitem">Decretos</a>
+             <a href="?page=entregas" role="menuitem">Entregas</a>
           </div>
           </li>
         </ul>
@@ -515,7 +515,7 @@
         "mapa-do-site":  { file: "mapa-do-site.html", title: "Mapa do site" },
         "como-participar": { file: "como-participar.html", title: "Como participar" },
         "sobre-o-programa": { file: "sobre-o-programa.html", title: "Sobre o Programa" },
-        decretos:        { file: "decretos.html", title: "Decretos" }
+        entregas:        { file: "entregas.html", title: "Entregas" }
       };
 
       const norm = (s) => (s || '').toString()
@@ -792,6 +792,9 @@
   const MUNICIPIOS_GEOJSON_URL = "./municipios.json";   // opcional (se não usar SHP)
   const SHP_ZIP_URL            = ""; // ex: "./PI_Municipios_2024.zip" (requer shp.min.js já incluído)
 
+  // ======= CAMADA EXTRA (.json) =======
+  const EXTRA_GEOJSON_URL      = "./municipios-atendidos.json"; // << novo arquivo
+
   // ======= DOM =======
   const $modal   = document.getElementById('regzModal');
   const $back    = document.getElementById('regzBackdrop');
@@ -901,17 +904,18 @@ function guessUpdateLabel(v){
     const iUpd   = head.findIndex(h => ['atualizado_em','atualizacao','atualizado','updated','last_update','data'].includes(h));
 
     const row = rows[1] || [];
-    const atual = iAtual>=0 ? row[iAtual] : row[0];
+    theAtual = iAtual>=0 ? row[iAtual] : row[0];
     const meta  = iMeta >=0 ? row[iMeta]  : row[1];
     const atualizado_em = iUpd>=0 ? row[iUpd] : '';
 
     const normNum = (v)=> String(v??'').replace(/[^\d.,-]/g,'').replace(/\./g,'').replace(',', '.');
 
-    return { meta: normNum(meta), atual: normNum(atual), atualizado_em };
+    return { meta: normNum(meta), atual: normNum(theAtual), atualizado_em };
   }
 
   // ======= MAPA no modal (Leaflet) =======
   let regzMap=null, regzCluster=null, regzMuniLayer=null, regzMapBooted=false;
+  let regzLayersCtrl=null, regzExtraLayer=null; // << controle e camada extra
 
   function numBRtoFloat(v){
     const s = String(v || '').replace(/\s+/g,'').replace(/\./g,'').replace(',', '.');
@@ -931,9 +935,9 @@ function guessUpdateLabel(v){
     if (!latlng) return;
     const nome   = props.municipio || props.nome || "Município";
     const status = props.status || "";
-    const info   = props.info   || "";
+    theInfo   = props.info   || "";
     const marker = L.marker(latlng, { title: nome });
-    marker.bindPopup(`<strong>${nome}</strong>${status?`<br><small>Status:</small> ${status}`:''}${info?`<br>${info}`:''}`);
+    marker.bindPopup(`<strong>${nome}</strong>${status?`<br><small>Status:</small> ${status}`:''}${theInfo?`<br>${theInfo}`:''}`);
     regzCluster.addLayer(marker);
   }
   async function loadLocalPoints(){
@@ -958,6 +962,8 @@ function guessUpdateLabel(v){
       regzMuniLayer = L.geoJSON(gj, {
         style: ()=>({ color:'#0a489b', weight:1, opacity:.85, fillColor:'#4ade80', fillOpacity:.12 })
       }).addTo(regzMap);
+      // adiciona ao controle
+      regzLayersCtrl?.addOverlay(regzMuniLayer, 'Municípios do Piauí');
     } else if (SHP_ZIP_URL && window.shp) {
       const gj = await shp(SHP_ZIP_URL);
       const fc = (gj.type === 'FeatureCollection' || gj.type === 'Feature')
@@ -967,8 +973,51 @@ function guessUpdateLabel(v){
       regzMuniLayer = L.geoJSON(fc, {
         style: ()=>({ color:'#0a489b', weight:1, opacity:.85, fillColor:'#4ade80', fillOpacity:.12 })
       }).addTo(regzMap);
+      regzLayersCtrl?.addOverlay(regzMuniLayer, 'Municípios');
     }
   }
+
+  // ======= NOVA CAMADA EXTRA (.json) =======
+  async function loadExtraLayer(){
+    if (!EXTRA_GEOJSON_URL) return;
+    const r = await fetch(EXTRA_GEOJSON_URL, { cache: 'no-cache' });
+    if (!r.ok) { console.warn("municipios-atendidos.json não encontrado"); return; }
+    const gj = await r.json();
+
+    // Se já existir no mapa, remove para recriar
+    if (regzExtraLayer) {
+      try { regzMap.removeLayer(regzExtraLayer); } catch {}
+      try { regzLayersCtrl?.removeLayer(regzExtraLayer); } catch {}
+    }
+
+    // Detecta se é ponto ou polígono/linha (usa a primeira feature como referência)
+    const isPoints = gj.type === 'FeatureCollection'
+      ? (gj.features?.[0]?.geometry?.type === 'Point')
+      : (gj.type === 'Feature' && gj.geometry?.type === 'Point');
+
+    regzExtraLayer = L.geoJSON(gj, {
+  style: () => ({
+    color: '#1050a0',     // verde escuro da borda
+    weight: 2,            // espessura da borda
+    opacity: 0.9,         // opacidade da borda
+    fillColor: '#1050a0', // verde claro preenchimento
+    fillOpacity: 0.50     // transparência do preenchimento
+  }),
+  onEachFeature: (feat, layer) => {
+    const p = feat.properties || {};
+    const nome = p.nome || p.municipio || p.titulo || 'Registro';
+    const extraInfo = Object.entries(p)
+      .slice(0, 8)
+      .map(([k,v]) => `<div><small><b>${k}:</b> ${v}</small></div>`).join('');
+    layer.bindPopup(`<strong>${nome}</strong>${extraInfo ? `<br>${extraInfo}` : ''}`);
+  }
+}).addTo(regzMap);
+
+
+    // adiciona ao controle para ligar/desligar
+    regzLayersCtrl?.addOverlay(regzExtraLayer, 'Municípios Atendidos');
+  }
+
   function initRegzMapOnce(){
     if (regzMapBooted) return;
     const el = document.getElementById('regzMap');
@@ -978,16 +1027,24 @@ function guessUpdateLabel(v){
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       { maxZoom:20, attribution:'© OpenStreetMap · © Carto' }).addTo(regzMap);
 
+    // Controle de camadas (sem base layers)
+    regzLayersCtrl = L.control.layers(null, {}, { collapsed: false }).addTo(regzMap);
+
     const piauiBounds = L.latLngBounds(L.latLng(-10.5,-45.0), L.latLng(-2.5,-40.0));
     regzMap.fitBounds(piauiBounds);
 
     regzCluster = L.markerClusterGroup({ showCoverageOnHover:false });
     regzMap.addLayer(regzCluster);
+    regzLayersCtrl.addOverlay(regzCluster, 'Localização');
 
+    // Carrega camadas
     loadMunicipios().catch(console.warn);
     loadLocalPoints()
       .then(()=>{ try{ regzMap.fitBounds(regzCluster.getBounds().pad(0.08)); }catch{} })
       .catch(console.warn);
+
+    // Carrega a camada extra
+    loadExtraLayer().catch(console.warn);
 
     regzMapBooted = true;
   }
@@ -1026,15 +1083,13 @@ function guessUpdateLabel(v){
   $btnClose?.addEventListener('click', closeModal);
   $back?.addEventListener('click', closeModal);
 
-    // sempre abrir o Regularizômetro ao carregar o site
+  // abrir o Regularizômetro ao carregar o site
   document.addEventListener("DOMContentLoaded", () => {
     openAndFetch();
   });
 
 })();
 </script>
-
-    </script>
 
     <!-- Leaflet + MarkerCluster (JS global para o SPA) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

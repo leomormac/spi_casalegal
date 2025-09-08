@@ -1,0 +1,294 @@
+<!-- entregas.html (antes: decretos.html) -->
+<style>
+  /* ===== Escopo da página de Entregas ===== */
+  .ent-wrap { display: grid; gap: 1rem; }
+  .ent-head { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: .75rem; }
+  .ent-lead { color: var(--muted); max-width: 75ch; line-height: 1.7; }
+
+  .ent-filters {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 0.8fr auto;
+    gap: .6rem;
+    background: #fff;
+    border: 1px solid #e6edf8;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: .8rem;
+  }
+  .ent-filters input[type="search"],
+  .ent-filters input[list],
+  .ent-filters select {
+    width: 100%;
+    padding: .65rem .8rem;
+    border: 1px solid var(--steel);
+    border-radius: 8px;
+    font: inherit;
+    background: #fff;
+  }
+  .ent-filters .ent-actions {
+    display: flex; gap: .5rem; align-items: center; justify-content: flex-end;
+  }
+  .ent-btn {
+    border: 1px solid #dbe2f0; background: #0a489b; color: #fff;
+    border-radius: 8px; padding: .65rem .9rem; cursor: pointer; font-weight: 600;
+  }
+  .ent-btn.secondary { background: #fff; color: #0a489b; }
+  .ent-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* Lista de resultados */
+  .ent-list { display: grid; gap: .6rem; margin-top: .25rem; }
+  .ent-item {
+    background: #fff; border: 1px solid #e6edf8; border-radius: 12px; box-shadow: var(--shadow);
+    padding: .85rem .95rem; display: grid; gap: .45rem;
+  }
+  .ent-top {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap;
+  }
+  .ent-id {
+    display: inline-flex; align-items: center; gap: .5rem; font-weight: 700;
+  }
+  .ent-badge {
+    display: inline-grid; place-items: center; padding: 0 .5rem; height: 26px;
+    border-radius: 6px; background: #f7fbff; border: 1px solid #e6edf8;
+    font-size: .85rem; text-transform: none;
+  }
+  .ent-meta { color: var(--muted); font-size: .92rem; }
+  .ent-title { font-size: 1.08rem; margin: 0; }
+  .ent-actions-row { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .ent-link {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .45rem .65rem; border: 1px solid #dbe2f0; border-radius: 8px;
+    text-decoration: none; color: #0a489b; background: #fff; font-weight: 600;
+  }
+  .ent-link:hover { background: #f7fbff; }
+  .ent-empty {
+    background: #fff; border: 1px solid #e6edf8; border-radius: 12px; box-shadow: var(--shadow);
+    padding: 1rem; color: var(--muted);
+  }
+
+  /* Paginação */
+  .ent-pager {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap;
+    margin-top: .25rem;
+  }
+  .ent-page-btns { display: inline-flex; gap: .4rem; }
+  .ent-page-btn {
+    border: 1px solid #dbe2f0; background: #fff; color: #0a489b; border-radius: 8px;
+    padding: .55rem .75rem; cursor: pointer; font-weight: 600;
+  }
+  .ent-page-btn[disabled] { opacity: .5; cursor: not-allowed; }
+  .ent-count { color: var(--muted); font-size: .92rem; }
+
+  /* Segurança de overflow */
+  .ent-wrap, .ent-wrap * { overflow-wrap: anywhere; word-break: break-word; }
+
+  @media (max-width: 1024px) {
+    .ent-filters { grid-template-columns: 1fr 1fr 1fr 1fr auto; }
+  }
+  @media (max-width: 720px) {
+    .ent-filters { grid-template-columns: 1fr 1fr; }
+    .ent-filters .ent-actions { grid-column: 1 / -1; justify-content: flex-start; }
+  }
+</style>
+
+<h1 style="color:#0a489b;">Entregas</h1>
+
+<div class="ent-wrap" aria-live="polite">
+  <div class="ent-head">
+    <p class="ent-lead">
+      Consulte as <strong>entregas de regularização</strong> do Casa Legal, 
+      Baixe o PDF com os imóveis já regularizados em cada área.
+    </p>
+  </div>
+
+  <!-- Filtros -->
+  <form class="ent-filters" id="entFilters" autocomplete="off">
+    <input type="search" id="entQ"
+           placeholder="Buscar por núcleo, conjunto, ocupação ou palavra-chave"
+           aria-label="Buscar entregas" />
+
+    <!-- Município: lista suspensa + digitação -->
+    <input id="entMunicipio"
+           list="entMunicipiosList"
+           placeholder="Município (digite ou selecione)"
+           aria-label="Filtrar por município" />
+    <datalist id="entMunicipiosList"></datalist>
+
+    <select id="entTipo" aria-label="Filtrar por tipo">
+      <option value="">Tipo (todos)</option>
+      <option>Conjunto Habitacional</option>
+      <option>Ocupação</option>
+    </select>
+
+    <select id="entSort" aria-label="Ordenar">
+      <option value="data_desc">Mais recentes</option>
+      <option value="nucleo_asc">Núcleo (A–Z)</option>
+      <option value="nucleo_desc">Núcleo (Z–A)</option>
+    </select>
+
+    <div class="ent-actions">
+      <button type="submit" class="ent-btn">Aplicar</button>
+      <button type="button" class="ent-btn secondary" id="entClear">Limpar</button>
+    </div>
+  </form>
+
+  <!-- Lista -->
+  <div id="entList" class="ent-list" role="list"></div>
+
+  <!-- Paginação -->
+  <div class="ent-pager">
+    <div class="ent-count" id="entCount">0 resultados</div>
+    <div class="ent-page-btns">
+      <button type="button" class="ent-page-btn" id="entPrev">‹ Anterior</button>
+      <button type="button" class="ent-page-btn" id="entNext">Próxima ›</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ===== Dados de EXEMPLO (troque pelos seus) =====
+  // Campos: id, nucleo, municipio, tipo ('Conjunto Habitacional' | 'Ocupação'), data (YYYY-MM-DD), pdf
+  const entDATA = [
+    { id:'PI-TER-001', nucleo:'Promorar I',    municipio:'Teresina',   tipo:'Conjunto Habitacional', data:'2025-08-15', pdf:'https://drive.google.com/file/d/1cvzONo1W2Wb1XEFHC_sQBXK-rf7jvJcj/view?usp=drive_link' },
+    { id:'PI-TER-002', nucleo:'Mocambinho',  municipio:'Teresina',   tipo:'Conjunto Habitacional', data:'2025-06-20', pdf:'https://exemplo/pdfs/mocambinho.pdf' },
+    { id:'PI-PAR-001', nucleo:'Mendoncinha', municipio:'Parnaíba',   tipo:'Ocupação',              data:'2025-04-08', pdf:'https://exemplo/pdfs/mendoncinha-parnaiba.pdf' },
+    { id:'PI-PIC-001', nucleo:'Bela Vista',  municipio:'Picos',      tipo:'Conjunto Habitacional', data:'2024-11-30', pdf:'https://exemplo/pdfs/belavista-picos.pdf' },
+    { id:'PI-FLO-001', nucleo:'Santa Rosa',  municipio:'Floriano',   tipo:'Ocupação',              data:'2024-10-12', pdf:'https://exemplo/pdfs/santarosa-floriano.pdf' },
+    { id:'PI-TER-003', nucleo:'Angelim',     municipio:'Teresina',   tipo:'Ocupação',              data:'2024-07-05', pdf:'https://exemplo/pdfs/angelim-ocupacao.pdf' },
+  ];
+
+  // ===== Estado e refs =====
+  const state = {
+    q: '', municipio: '', tipo: '', sort: 'data_desc',
+    page: 1, perPage: 10,
+    view: []
+  };
+
+  const $list  = document.getElementById('entList');
+  const $count = document.getElementById('entCount');
+  const $prev  = document.getElementById('entPrev');
+  const $next  = document.getElementById('entNext');
+
+  const $filters   = document.getElementById('entFilters');
+  const $q         = document.getElementById('entQ');
+  const $municipio = document.getElementById('entMunicipio');      // input com datalist
+  const $munList   = document.getElementById('entMunicipiosList'); // datalist
+  const $tipo      = document.getElementById('entTipo');
+  const $sort      = document.getElementById('entSort');
+  const $clear     = document.getElementById('entClear');
+
+  // ===== Utils =====
+  const fmtDate = (iso) => {
+    if (!iso) return '';
+    const d = new Date(iso + 'T12:00:00'); // fixa timezone
+    return d.toLocaleDateString('pt-BR');
+  };
+
+  // Preenche datalist de municípios (suporta digitação + dropdown)
+  (function fillMunicipios(){
+    const municipios = Array.from(new Set(
+      entDATA.map(d => d.municipio).filter(Boolean)
+    )).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    $munList.innerHTML = municipios.map(m => `<option value="${m}">`).join('');
+  })();
+
+  // ===== Filtro + ordenação =====
+  function apply(){
+    const q = (state.q || '').trim().toLowerCase();
+    const mun = (state.municipio || '').trim().toLowerCase();
+    let arr = entDATA.slice();
+
+    if (q) {
+      arr = arr.filter(d =>
+        (d.nucleo||'').toLowerCase().includes(q) ||
+        (d.municipio||'').toLowerCase().includes(q) ||
+        (d.tipo||'').toLowerCase().includes(q)
+      );
+    }
+
+    // Município: filtra por "contém" (case-insensitive)
+    if (mun) {
+      arr = arr.filter(d => (d.municipio||'').toLowerCase().includes(mun));
+    }
+
+    if (state.tipo) {
+      arr = arr.filter(d => (d.tipo || '') === state.tipo);
+    }
+
+    // Ordenação (sem "Mais antigos")
+    switch (state.sort) {
+      case 'data_desc':   arr.sort((a,b)=> b.data.localeCompare(a.data)); break;
+      case 'nucleo_asc':  arr.sort((a,b)=> (a.nucleo||'').localeCompare(b.nucleo||'', 'pt-BR')); break;
+      case 'nucleo_desc': arr.sort((a,b)=> (b.nucleo||'').localeCompare(a.nucleo||'', 'pt-BR')); break;
+      default:            arr.sort((a,b)=> b.data.localeCompare(a.data));
+    }
+
+    state.view = arr;
+    state.page = 1;
+    render();
+  }
+
+  // ===== Render =====
+  function render(){
+    const total = state.view.length;
+    const start = (state.page - 1) * state.perPage;
+    const end   = start + state.perPage;
+    const pageItems = state.view.slice(start, end);
+
+    $count.textContent = total
+      ? `${total} entrega${total>1?'s':''} — página ${state.page} de ${Math.max(1, Math.ceil(total/state.perPage))}`
+      : 'Nenhuma entrega encontrada';
+
+    $prev.disabled = state.page <= 1;
+    $next.disabled = end >= total;
+
+    if (!pageItems.length) {
+      $list.innerHTML = `<div class="ent-empty">Tente alterar os filtros ou limpar a busca.</div>`;
+      return;
+    }
+
+    $list.innerHTML = pageItems.map(item => `
+      <article class="ent-item" role="listitem">
+        <div class="ent-top">
+          <div class="ent-id">
+            <span class="ent-badge">${item.tipo || '—'}</span>
+            <span>${item.municipio || '—'}</span>
+          </div>
+          <div class="ent-meta">${fmtDate(item.data)}</div>
+        </div>
+
+        <!-- Título = nome do núcleo -->
+        <h3 class="ent-title">${item.nucleo || ''}</h3>
+
+        <div class="ent-actions-row">
+          ${item.pdf ? `<a class="ent-link" href="${item.pdf}" target="_blank" rel="noopener" aria-label="Abrir PDF de imóveis regularizados para ${item.nucleo}">📄 PDF</a>` : ''}
+        </div>
+      </article>
+    `).join('');
+  }
+
+  // ===== Eventos =====
+  $filters.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    state.q         = $q.value;
+    state.municipio = $municipio.value;  // pega digitação ou seleção do datalist
+    state.tipo      = $tipo.value;
+    state.sort      = $sort.value;
+    apply();
+  });
+  $clear.addEventListener('click', ()=>{
+    $q.value=''; $municipio.value=''; $tipo.value=''; $sort.value='data_desc';
+    state.q=''; state.municipio=''; state.tipo=''; state.sort='data_desc';
+    apply();
+  });
+  $prev.addEventListener('click', ()=>{ if (state.page>1) { state.page--; render(); } });
+  $next.addEventListener('click', ()=>{
+    const max = Math.ceil(state.view.length / state.perPage);
+    if (state.page < max) { state.page++; render(); }
+  });
+
+  // Primeira carga
+  apply();
+})();
+</script>
