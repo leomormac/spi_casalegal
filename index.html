@@ -76,6 +76,17 @@
   .submenu a { display: block; color: #fff; padding: 0.5rem 0.75rem; border-radius: 4px; white-space: nowrap; }
   .submenu a:hover { background: rgba(255, 255, 255, 0.12); }
 
+  /* === FIXAR MENU + SOMBRA AO ROLAR (OPÇÃO 2) === */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    transition: box-shadow .2s ease;
+  }
+  .nav.is-stuck {
+    box-shadow: 0 4px 14px rgba(0,0,0,.08);
+  }
+
   @media (max-width: 980px) {
     .nav .inner { height: auto; padding: 0.5rem 1rem; }
     .menu { flex-wrap: wrap; justify-content: center; }
@@ -274,6 +285,52 @@
     margin-top:.6rem;
     overflow:hidden;
   }
+
+  /* ===== Números com efeito caça-níqueis (fix altura) ===== */
+  .num-roll {
+    display: inline-flex;
+    gap: 2px;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    line-height: 1.2;
+  }
+  .num-roll .digit {
+    position: relative;
+    width: 0.72em;
+    height: 1.4em;          /* altura visível do dígito */
+    overflow: hidden;
+  }
+  .num-roll .reel {
+    position: absolute;
+    left: 0; top: 0;
+    will-change: transform;
+  }
+  .num-roll .reel span {
+    display: block;
+    height: 1.4em;          /* igual à “janelinha” */
+    line-height: 1.4em;
+  }
+  .num-roll .sep {
+    padding: 0 0.05em;
+    opacity: .85;
+  }
+/* Alinha o % com os números */
+#regzPerc {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Pulso animado */
+.num-roll.pulse {
+  animation: pulse 0.6s ease-out;
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
     </style>
   </head>
 
@@ -378,7 +435,6 @@
           <li><a href="?page=noticias">Notícias</a></li>
           <li><a href="https://transparencia.pi.gov.br/ords/f?p=101:1::::::" target="_blank" rel="noopener">Transparência</a></li>
           <li><a href="https://majestic-duckanoo-b4cb2b.netlify.app/" target="_blank" rel="noopener">Resultados</a></li>
-          
 
           <!-- Botão no menu que abre o Regularizômetro -->
           <li><a href="#" id="btnRegularizometro">Regularizômetro</a></li>
@@ -495,6 +551,24 @@
             }
           });
         });
+      })();
+    </script>
+
+    <!-- Script EXTRA (opção 2): sombra quando a nav “grudar” -->
+    <script>
+      (function(){
+        const nav = document.querySelector('.nav');
+        if (!nav) return;
+
+        const sentinel = document.createElement('div');
+        sentinel.style.height = '1px';
+        nav.parentNode.insertBefore(sentinel, nav);
+
+        const io = new IntersectionObserver(([entry]) => {
+          nav.classList.toggle('is-stuck', !entry.isIntersecting);
+        }, { threshold: [0, 1] });
+
+        io.observe(sentinel);
       })();
     </script>
 
@@ -783,20 +857,20 @@
 <script>
 (function(){
   // ======= KPIs (Planilha Google) =======
-  const SHEET_ID   = '1xn97o-p3vVDaXkpm1wQU0zZaJtlAeeHZqyIdOHHUTTA'; // <— mantenha/ajuste
-  const SHEET_NAME = 'Regularizometro';                               // <— mantenha/ajuste
-  let   CSV_URL    = ''; // Se você já publicou a aba como CSV, cole aqui a URL completa do CSV
+  const SHEET_ID   = '1xn97o-p3vVDaXkpm1wQU0zZaJtlAeeHZqyIdOHHUTTA';
+  const SHEET_NAME = 'Regularizometro';
+  let   CSV_URL    = '';
   if (!CSV_URL && SHEET_ID && SHEET_NAME) {
     CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
   }
 
   // ======= MAPA (arquivos locais) =======
-  const POINTS_GEOJSON_URL     = "./pontos.json";       // obrigatório p/ pinos
-  const MUNICIPIOS_GEOJSON_URL = "./municipios.json";   // opcional (se não usar SHP)
-  const SHP_ZIP_URL            = ""; // ex: "./PI_Municipios_2024.zip" (requer shp.min.js já incluído)
+  const POINTS_GEOJSON_URL     = "./pontos.json";
+  const MUNICIPIOS_GEOJSON_URL = "./municipios.json";
+  const SHP_ZIP_URL            = "";
 
   // ======= CAMADA EXTRA (.json) =======
-  const EXTRA_GEOJSON_URL      = "./municipios-atendidos.json"; // << novo arquivo
+  const EXTRA_GEOJSON_URL      = "./municipios-atendidos.json";
 
   // ======= DOM =======
   const $modal   = document.getElementById('regzModal');
@@ -819,62 +893,170 @@
   function closeModal(){ $back.classList.remove('open'); $modal.classList.remove('open'); document.body.style.overflow = ''; }
   document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeModal(); });
 
-  // tenta converter string em Date priorizando formato brasileiro
-function parseDateSmart(v){
-  if (!v) return null;
-  const s = String(v).trim();
-
-  // DD/MM/YYYY (com ou sem hora)
-  let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
-  if (m){
-    const [ , d, mo, y, hh='00', mm='00', ss='00' ] = m;
-    const dt = new Date(Number(y), Number(mo)-1, Number(d), Number(hh), Number(mm), Number(ss));
-    return isNaN(dt.getTime()) ? null : dt;
-  }
-
-  // YYYY-MM-DD (com ou sem hora)
-  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if (m){
-    const [ , y, mo, d, hh='00', mm='00', ss='00' ] = m;
-    const dt = new Date(Number(y), Number(mo)-1, Number(d), Number(hh), Number(mm), Number(ss));
-    return isNaN(dt.getTime()) ? null : dt;
-  }
-
-  // fallback: deixe o motor do navegador tentar
-  const dt = new Date(s);
-  return isNaN(dt.getTime()) ? null : dt;
-}
-
-// EXIBE sempre como dd/mm/aaaa hh:mm
-function guessUpdateLabel(v){
-  const dt = parseDateSmart(v);
-  if (!dt) return v || '–';
-  const data = dt.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
-  const hora = dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
-  return `${data} ${hora}`;
-}
-
-  function animateNumber($el, to){
-    const from = Number(($el.textContent||'').replace(/[^\d]/g,'')) || 0;
-    const dur = 700, start = performance.now();
-    function frame(t){
-      const k = clamp((t - start)/dur, 0, 1);
-      const val = Math.round(from + (to - from)*k);
-      $el.textContent = val.toLocaleString('pt-BR');
-      if (k < 1) requestAnimationFrame(frame);
+  // Datas
+  function parseDateSmart(v){
+    if (!v) return null;
+    const s = String(v).trim();
+    let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+    if (m){
+      const [ , d, mo, y, hh='00', mm='00', ss='00' ] = m;
+      const dt = new Date(Number(y), Number(mo)-1, Number(d), Number(hh), Number(mm), Number(ss));
+      return isNaN(dt.getTime()) ? null : dt;
     }
-    requestAnimationFrame(frame);
+    m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+    if (m){
+      const [ , y, mo, d, hh='00', mm='00', ss='00' ] = m;
+      const dt = new Date(Number(y), Number(mo)-1, Number(d), Number(hh), Number(mm), Number(ss));
+      return isNaN(dt.getTime()) ? null : dt;
+    }
+    const dt = new Date(s);
+    return isNaN(dt.getTime()) ? null : dt;
   }
+  function guessUpdateLabel(v){
+    const dt = parseDateSmart(v);
+    if (!dt) return v || '–';
+    const data = dt.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+    const hora = dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    return `${data} ${hora}`;
+  }
+
+  /* ========= Helpers de animação tipo "caça-níqueis" ========= */
+  function ensureRollHost(el){
+    if (!el) return null;
+    if (!el.__rollHost) {
+      const host = document.createElement('span');
+      host.className = 'num-roll';
+      el.textContent = '';
+      el.appendChild(host);
+      el.__rollHost = host;
+    }
+    return el.__rollHost;
+  }
+  const REEL_REPEAT = 12; // quantas vezes (0..9) se repete no carretel
+
+function makeDigitColumn(){
+  const col = document.createElement('span');
+  col.className = 'digit';
+  const reel = document.createElement('span');
+  reel.className = 'reel';
+
+  // cria um carretel longo: 0..9 repetidos
+  for (let r = 0; r < REEL_REPEAT; r++) {
+    for (let d = 0; d <= 9; d++) {
+      const s = document.createElement('span');
+      s.textContent = String(d);
+      reel.appendChild(s);
+    }
+  }
+  col.appendChild(reel);
+  return col;
+}
+  function makeSep(char){
+    const s = document.createElement('span');
+    s.className = 'sep';
+    s.textContent = char;
+    return s;
+  }
+  function measureCellH(col){
+    const span = col.querySelector('.reel span');
+    const h1 = span ? span.getBoundingClientRect().height : 0;
+    const h2 = parseFloat(getComputedStyle(col).lineHeight);
+    return h1 || h2 || 18;
+  }
+ function setReelToDigit(col, digit, turns = 1, duration = 700){
+  const reel = col.firstChild;
+
+  // mede depois do layout
+  requestAnimationFrame(() => {
+    const cell = reel.querySelector('span');
+    const cellH = cell?.getBoundingClientRect().height || parseFloat(getComputedStyle(col).lineHeight) || 18;
+
+    // posição inicial aleatória (0..9) dentro do 1º ciclo
+    const startDigit = Math.floor(Math.random() * 10);        // 0..9
+    const startIndex = startDigit;                             // dentro do 1º ciclo
+    reel.style.transition = 'none';
+    reel.style.transform = `translateY(${-startIndex * cellH}px)`;
+
+    // quantos passos para chegar no dígito alvo respeitando o start
+    const deltaDigit = (digit - startDigit + 10) % 10;         // 0..9
+    const steps = turns * 10 + deltaDigit;                     // total de passos
+    const targetIndex = startIndex + steps;
+
+    // segurança: garante que o reel tem altura suficiente
+    const maxIndex = (REEL_REPEAT * 10) - 1;
+    const safeIndex = Math.min(targetIndex, maxIndex - 1);
+
+    requestAnimationFrame(() => {
+      reel.style.transition = `transform ${duration}ms cubic-bezier(.22,.8,.28,1)`;
+      reel.style.transform = `translateY(${-safeIndex * cellH}px)`;
+    });
+  });
+}
+  function rollTo(el, value, opts={}){
+    const { duration = 900, turnsBase = 1, turnsRand = 1 } = opts;
+    const host = ensureRollHost(el);
+    if (!host) return;
+
+    const parts = String(
+      typeof value === 'number' ? value.toLocaleString('pt-BR') : (value ?? '')
+    ).split('');
+
+    let iDom = 0;
+    for (let i = 0; i < parts.length; i++){
+      const ch = parts[i];
+      if (/\d/.test(ch)) {
+        let col = host.children[iDom];
+        if (!col || !col.classList.contains('digit')) {
+          col = makeDigitColumn();
+          host.insertBefore(col, host.children[iDom] || null);
+        }
+        const turns = turnsBase + Math.floor(Math.random() * (turnsRand + 1));
+        setReelToDigit(col, Number(ch), turns, duration);
+        iDom++;
+      } else {
+        let sep = host.children[iDom];
+        if (!sep || !sep.classList.contains('sep')) {
+          sep = makeSep(ch);
+          host.insertBefore(sep, host.children[iDom] || null);
+        } else {
+          sep.textContent = ch;
+        }
+        iDom++;
+      }
+    }
+    while (host.children.length > iDom) host.removeChild(host.lastChild);
+  }
+
+  function pulseOnEnd(el, delay = 1000){
+  const host = ensureRollHost(el);
+  if (!host) return;
+  setTimeout(() => {
+    host.classList.add('pulse');
+    setTimeout(() => host.classList.remove('pulse'), 600); // remove após a animação
+  }, delay);
+}
+
+
+  function animateNumber(){ /* substituído pelo rollTo */ }
+
   function updateUI({meta, atual, atualizado_em}){
-    const m = Number(meta||0);
-    const a = Number(atual||0);
-    const pct = m > 0 ? clamp((a/m)*100, 0, 100) : 0;
-    $meta.textContent = br(m);
-    $atual.textContent = br(a);
-    $upd.textContent = guessUpdateLabel(atualizado_em);
-    animateNumber($perc, Math.round(pct));
-    requestAnimationFrame(()=>{ $bar.style.width = pct + '%'; });
-  }
+  const m = Number(meta||0);
+  const a = Number(atual||0);
+  const pct = m > 0 ? Math.max(0, Math.min(100, (a/m)*100)) : 0;
+
+  rollTo($meta, m, { duration: 900, turnsBase: 1, turnsRand: 1 });
+  rollTo($atual, a, { duration: 1000, turnsBase: 1, turnsRand: 2 });
+  rollTo($perc,  Math.round(pct), { duration: 800, turnsBase: 1, turnsRand: 1 });
+
+  // Pulso ao fim da animação
+  pulseOnEnd($meta, 950);
+  pulseOnEnd($atual, 1050);
+  pulseOnEnd($perc, 850);
+
+  $upd.textContent = guessUpdateLabel(atualizado_em);
+  requestAnimationFrame(()=>{ $bar.style.width = pct + '%'; });
+}
+
 
   // ======= CSV (planilha Google) =======
   function csvToRows(csv){
@@ -918,7 +1100,7 @@ function guessUpdateLabel(v){
 
   // ======= MAPA no modal (Leaflet) =======
   let regzMap=null, regzCluster=null, regzMuniLayer=null, regzMapBooted=false;
-  let regzLayersCtrl=null, regzExtraLayer=null; // << controle e camada extra
+  let regzLayersCtrl=null, regzExtraLayer=null;
 
   function numBRtoFloat(v){
     const s = String(v || '').replace(/\s+/g,'').replace(/\./g,'').replace(',', '.');
@@ -965,7 +1147,6 @@ function guessUpdateLabel(v){
       regzMuniLayer = L.geoJSON(gj, {
         style: ()=>({ color:'#0a489b', weight:1, opacity:.85, fillColor:'#4ade80', fillOpacity:.12 })
       }).addTo(regzMap);
-      // adiciona ao controle
       regzLayersCtrl?.addOverlay(regzMuniLayer, 'Municípios do Piauí');
     } else if (SHP_ZIP_URL && window.shp) {
       const gj = await shp(SHP_ZIP_URL);
@@ -980,44 +1161,35 @@ function guessUpdateLabel(v){
     }
   }
 
-  // ======= NOVA CAMADA EXTRA (.json) =======
   async function loadExtraLayer(){
     if (!EXTRA_GEOJSON_URL) return;
     const r = await fetch(EXTRA_GEOJSON_URL, { cache: 'no-cache' });
     if (!r.ok) { console.warn("municipios-atendidos.json não encontrado"); return; }
     const gj = await r.json();
 
-    // Se já existir no mapa, remove para recriar
     if (regzExtraLayer) {
       try { regzMap.removeLayer(regzExtraLayer); } catch {}
       try { regzLayersCtrl?.removeLayer(regzExtraLayer); } catch {}
     }
 
-    // Detecta se é ponto ou polígono/linha (usa a primeira feature como referência)
-    const isPoints = gj.type === 'FeatureCollection'
-      ? (gj.features?.[0]?.geometry?.type === 'Point')
-      : (gj.type === 'Feature' && gj.geometry?.type === 'Point');
-
     regzExtraLayer = L.geoJSON(gj, {
-  style: () => ({
-    color: '#1050a0',     // verde escuro da borda
-    weight: 2,            // espessura da borda
-    opacity: 0.9,         // opacidade da borda
-    fillColor: '#1050a0', // verde claro preenchimento
-    fillOpacity: 0.50     // transparência do preenchimento
-  }),
-  onEachFeature: (feat, layer) => {
-    const p = feat.properties || {};
-    const nome = p.nome || p.municipio || p.titulo || 'Registro';
-    const extraInfo = Object.entries(p)
-      .slice(0, 8)
-      .map(([k,v]) => `<div><small><b>${k}:</b> ${v}</small></div>`).join('');
-    layer.bindPopup(`<strong>${nome}</strong>${extraInfo ? `<br>${extraInfo}` : ''}`);
-  }
-}).addTo(regzMap);
+      style: () => ({
+        color: '#1050a0',
+        weight: 2,
+        opacity: 0.9,
+        fillColor: '#1050a0',
+        fillOpacity: 0.50
+      }),
+      onEachFeature: (feat, layer) => {
+        const p = feat.properties || {};
+        const nome = p.nome || p.municipio || p.titulo || 'Registro';
+        const extraInfo = Object.entries(p)
+          .slice(0, 8)
+          .map(([k,v]) => `<div><small><b>${k}:</b> ${v}</small></div>`).join('');
+        layer.bindPopup(`<strong>${nome}</strong>${extraInfo ? `<br>${extraInfo}` : ''}`);
+      }
+    }).addTo(regzMap);
 
-
-    // adiciona ao controle para ligar/desligar
     regzLayersCtrl?.addOverlay(regzExtraLayer, 'Municípios Atendidos');
   }
 
@@ -1030,7 +1202,6 @@ function guessUpdateLabel(v){
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       { maxZoom:20, attribution:'© OpenStreetMap · © Carto' }).addTo(regzMap);
 
-    // Controle de camadas (sem base layers)
     regzLayersCtrl = L.control.layers(null, {}, { collapsed: false }).addTo(regzMap);
 
     const piauiBounds = L.latLngBounds(L.latLng(-10.5,-45.0), L.latLng(-2.5,-40.0));
@@ -1040,13 +1211,11 @@ function guessUpdateLabel(v){
     regzMap.addLayer(regzCluster);
     regzLayersCtrl.addOverlay(regzCluster, 'Localização');
 
-    // Carrega camadas
     loadMunicipios().catch(console.warn);
     loadLocalPoints()
       .then(()=>{ try{ regzMap.fitBounds(regzCluster.getBounds().pad(0.08)); }catch{} })
       .catch(console.warn);
 
-    // Carrega a camada extra
     loadExtraLayer().catch(console.warn);
 
     regzMapBooted = true;
@@ -1055,11 +1224,9 @@ function guessUpdateLabel(v){
   async function openAndFetch(){
     openModal();
 
-    // KPIs da planilha
     fetchSheet()
       .then(data=>{
         updateUI(data);
-        // Link para a planilha (opcional)
         if (CSV_URL.includes('/gviz/')) {
           $link.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=0`;
         } else {
@@ -1073,20 +1240,17 @@ function guessUpdateLabel(v){
         $link.style.display = 'none';
       });
 
-    // garante o mapa após o modal abrir
     setTimeout(()=>{
       initRegzMapOnce();
       try { regzMap.invalidateSize(true); } catch(e){}
     }, 80);
   }
 
-  // Eventos de abrir/fechar
   $btnFloat?.addEventListener('click', (e)=>{ e.preventDefault(); openAndFetch(); });
   $btnMenu?.addEventListener('click',  (e)=>{ e.preventDefault(); openAndFetch(); });
   $btnClose?.addEventListener('click', closeModal);
   $back?.addEventListener('click', closeModal);
 
-  // abrir o Regularizômetro ao carregar o site
   document.addEventListener("DOMContentLoaded", () => {
     openAndFetch();
   });
