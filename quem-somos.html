@@ -1,204 +1,128 @@
 <!-- quem-somos.html -->
 <style>
   /* Estilos escopados ao "Quem somos" */
-  .qs-wrap {
-    display: grid;
-    gap: 2rem;
-  }
-  .qs-lead {
-    max-width: 70ch;
-    font-size: 1.05rem;
-    color: var(--muted);
-    line-height: 1.7;
-  }
+  .qs-wrap { display: grid; gap: 2rem; }
+  .qs-lead { max-width: 70ch; font-size: 1.05rem; color: var(--muted); line-height: 1.7; }
+
   .qs-hero {
-    display: grid;
-    gap: 1.5rem;
-    align-items: start;
+    display: grid; gap: 1.5rem; align-items: start;
     grid-template-columns: 1.2fr 0.8fr;
   }
   .qs-hero figure {
-    margin: 0;
-    border: 1px solid #e6edf8;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    background: #fff;
+    margin: 0; border: 1px solid #e6edf8; border-radius: 12px; overflow: hidden;
+    box-shadow: var(--shadow); background: #fff;
   }
-  .qs-hero img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-  .qs-hero figcaption {
-    font-size: 0.85rem;
-    color: var(--muted);
-    padding: 0.5rem 0.9rem;
-  }
+  .qs-hero img { width: 100%; height: auto; display: block; }
+  .qs-hero figcaption { font-size: 0.85rem; color: var(--muted); padding: 0.5rem 0.9rem; }
 
-  .qs-cards {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
-  }
+  .qs-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
   .qs-card {
-    background: #fff;
-    border: 1px solid #e6edf8;
-    border-radius: 12px;
-    padding: 1rem 1.1rem;
-    box-shadow: var(--shadow);
+    background: #fff; border: 1px solid #e6edf8; border-radius: 12px;
+    padding: 1rem 1.1rem; box-shadow: var(--shadow);
   }
-  .qs-card h3 {
-    margin: 0.25rem 0 0.5rem;
-    font-size: 1.05rem;
-  }
-  .qs-card p {
-    margin: 0;
-    color: var(--muted);
-  }
+  .qs-card h3 { margin: 0.25rem 0 0.5rem; font-size: 1.05rem; }
+  .qs-card p { margin: 0; color: var(--muted); }
 
-  .qs-list {
-    display: grid;
-    gap: 0.6rem;
-    margin: 0.25rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
+  .qs-list { display: grid; gap: 0.6rem; margin: 0.25rem 0 0; padding: 0; list-style: none; }
   .qs-list li {
-    display: grid;
-    grid-template-columns: 24px 1fr;
-    align-items: start;
-    gap: 0.6rem;
+    display: grid; grid-template-columns: 24px 1fr; align-items: start; gap: 0.6rem;
   }
   .qs-ico {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    display: inline-grid;
-    place-items: center;
-    font-size: 0.9rem;
-    background: #f7fbff;
-    border: 1px solid #e6edf8;
+    width: 24px; height: 24px; border-radius: 6px; display: inline-grid; place-items: center;
+    font-size: 0.9rem; background: #f7fbff; border: 1px solid #e6edf8;
   }
-  /* Ícones azuis no estilo do print */
-  .qs-ico i {
-    color: #1050a0;    /* azul institucional */
-    font-size: 18px;
-    line-height: 1;
-  }
+  /* Ícones azuis (bootstrap icons) */
+  .qs-ico i { color: #1050a0; font-size: 18px; line-height: 1; }
 
-  .qs-stats {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
-  }
+  .qs-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
   .qs-stat {
-    background: #fff;
-    border: 1px solid #e6edf8;
-    border-radius: 12px;
-    padding: 1rem;
-    text-align: center;
-    box-shadow: var(--shadow);
+    background: #fff; border: 1px solid #e6edf8; border-radius: 12px;
+    padding: 1rem; text-align: center; box-shadow: var(--shadow);
   }
-  .qs-stat strong {
-    display: block;
-    font-size: 1.6rem;
-    line-height: 1.1;
-  }
-  .qs-stat span {
-    color: var(--muted);
-    font-size: 0.95rem;
-  }
+  .qs-stat strong { display: block; font-size: 1.6rem; line-height: 1.1; }
+  .qs-stat span { color: var(--muted); font-size: 0.95rem; }
 
   .qs-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 20px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 20px;
+    align-items: stretch; /* garante alturas iguais por linha */
   }
   .qs-block {
-    background: #fff;
-    border: 1px solid #e6edf8;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    padding: 1rem 1.1rem;
+    background: #fff; border: 1px solid #e6edf8; border-radius: 12px;
+    box-shadow: var(--shadow); padding: 1rem 1.1rem;
+    display: flex; flex-direction: column; /* ajuda a padronizar alturas */
   }
-  .qs-block h3 {
-    margin: 0.25rem 0 0.75rem;
-  }
+  .qs-block h3 { margin: 0.25rem 0 0.75rem; }
 
-  .qs-dl {
-    display: grid;
-    gap: 0.4rem;
-    margin: 0;
-  }
-  .qs-dl dt {
-    font-weight: 600;
-  }
-  .qs-dl dd {
-    margin: 0;
-    color: var(--muted);
-  }
+  .qs-dl { display: grid; gap: 0.4rem; margin: 0; }
+  .qs-dl dt { font-weight: 600; }
+  .qs-dl dd { margin: 0; color: var(--muted); }
 
   .qs-callout {
-    border: 1px solid #e6edf8;
-    border-left: 4px solid var(--blue);
-    background: #f7fbff;
-    padding: 0.9rem 1rem;
-    border-radius: 10px;
+    border: 1px solid #e6edf8; border-left: 4px solid var(--blue);
+    background: #f7fbff; padding: 0.9rem 1rem; border-radius: 10px;
   }
 
-  /* Ajudas de overflow (palavras grandes) */
-  .qs-wrap,
-  .qs-wrap * {
-    overflow-wrap: anywhere;
-    word-break: break-word;
+  /* BLOCO DE PERFIL (dentro do grid como .qs-block) */
+  .qs-profile .qs-prof-head {
+    display: grid; grid-template-columns: 80px 1fr; gap: .75rem; align-items: center; margin-bottom: .5rem;
   }
+  .qs-profile .qs-prof-avatar {
+    width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+    border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  }
+  .qs-profile .qs-prof-role { font-size: .92rem; color: var(--muted); line-height: 1.2; }
+  .qs-profile .qs-prof-name { font-weight: 700; font-size: 1.05rem; }
+
+  /* Ajudas de overflow */
+  .qs-wrap, .qs-wrap * { overflow-wrap: anywhere; word-break: break-word; }
 
   @media (max-width: 980px) {
-    .qs-hero {
-      grid-template-columns: 1fr;
-    }
-    .qs-cards {
-      grid-template-columns: 1fr;
-    }
-    .qs-stats {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .qs-columns {
-      grid-template-columns: 1fr;
-    }
+    .qs-hero { grid-template-columns: 1fr; }
+    .qs-cards { grid-template-columns: 1fr; }
+    .qs-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .qs-columns { grid-template-columns: 1fr; }
   }
+
+  /* Avatar circular da superintendente — sobrepõe a regra global do #miolo img */
+.qs-profile .qs-prof-avatar {
+  width: 100px !important;   /* mesmo valor para largura e altura */
+  aspect-ratio: 1 / 1;       /* garante proporção quadrada */
+  border-radius: 50% !important; /* círculo */
+  object-fit: cover;         /* preenche sem distorcer */
+  display: block;            /* evita espaços estranhos */
+}
 </style>
 
-<h1 style="color:#1050a0;">Quem somos</h1
+<h1 style="color:#1050a0;">Quem somos</h1>
 
 <div class="qs-wrap">
   <!-- Intro / Missão -->
   <section class="qs-hero">
     <div>
       <p class="qs-lead">
-  A Superintendência de Patrimônio Imobiliário (SPI) constitui-se como órgão estratégico da Administração Pública Estadual, com a missão de assegurar a excelência na gestão do patrimônio público do Estado do Piauí. Seu propósito é promover, de forma contínua, o aprimoramento da administração de recursos humanos, materiais e patrimoniais, pautando-se nos princípios da eficiência, inovação e transparência.
-</p>
-
-<p class="qs-lead">
-  Comprometida com a responsabilidade social e ambiental, a SPI busca consolidar parcerias institucionais e estratégicas que possibilitem maior modernização e celeridade nos processos administrativos. Ademais, investe na transformação digital como instrumento de otimização dos serviços, ampliando a qualidade do atendimento prestado à população piauiense e fortalecendo a integração entre o cidadão e o Estado.
-</p>
+        A Superintendência de Patrimônio Imobiliário (SPI) constitui-se como órgão estratégico da Administração Pública Estadual,
+        com a missão de assegurar a excelência na gestão do patrimônio público do Estado do Piauí. Seu propósito é promover, de
+        forma contínua, o aprimoramento da administração de recursos humanos, materiais e patrimoniais, pautando-se nos princípios
+        da eficiência, inovação e transparência.
+      </p>
+      <p class="qs-lead">
+        Comprometida com a responsabilidade social e ambiental, a SPI busca consolidar parcerias institucionais e estratégicas que
+        possibilitem maior modernização e celeridade nos processos administrativos. Ademais, investe na transformação digital como
+        instrumento de otimização dos serviços, ampliando a qualidade do atendimento prestado à população piauiense e fortalecendo
+        a integração entre o cidadão e o Estado.
+      </p>
 
       <div class="qs-callout" role="note" aria-label="Missão institucional">
         <strong>Missão</strong><br />
-        Promover uma Administração Pública moderna, transparente e orientada a
-        resultados, apoiando os órgãos estaduais e facilitando a vida do
-        cidadão.
+        Promover uma Administração Pública moderna, transparente e orientada a resultados, apoiando os órgãos estaduais e
+        facilitando a vida do cidadão.
       </div>
     </div>
 
     <figure>
-      <img
-        src="https://admin.pi.gov.br/uploads/prourbe_5_301f3c40cd.jpeg"
-        alt="Equipe trabalhando em ambiente colaborativo"
-      />
-      <figcaption>Realizando cadsastro social.</figcaption>
+      <img src="https://admin.pi.gov.br/uploads/prourbe_5_301f3c40cd.jpeg"
+           alt="Equipe trabalhando em ambiente colaborativo" />
+      <figcaption>Realizando cadastro social.</figcaption>
     </figure>
   </section>
 
@@ -208,48 +132,25 @@
     <div class="qs-cards">
       <article class="qs-card">
         <h3>Visão</h3>
-        <p>
-          Ser reconhecida como referência na gestão pública, destacando-se pela transformação digital, eficiência e transparência.
-        </p>
+        <p>Ser reconhecida como referência na gestão pública, destacando-se pela transformação digital, eficiência e transparência.</p>
       </article>
 
       <article class="qs-card">
         <h3>Valores</h3>
         <ul class="qs-list">
-          <li>
-            <span class="qs-ico"><i class="bi bi-check-circle-fill"></i></span>
-            <span>Ética e integridade no serviço público</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-people-fill"></i></span>
-            <span>Colaboração e respeito às pessoas</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-bar-chart-fill"></i></span>
-            <span>Transparência e dados para decisão</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-lightbulb-fill"></i></span>
-            <span>Inovação e melhoria contínua</span>
-          </li>
+          <li><span class="qs-ico"><i class="bi bi-check-circle-fill"></i></span><span>Ética e integridade no serviço público</span></li>
+          <li><span class="qs-ico"><i class="bi bi-people-fill"></i></span><span>Colaboração e respeito às pessoas</span></li>
+          <li><span class="qs-ico"><i class="bi bi-bar-chart-fill"></i></span><span>Transparência e dados para decisão</span></li>
+          <li><span class="qs-ico"><i class="bi bi-lightbulb-fill"></i></span><span>Inovação e melhoria contínua</span></li>
         </ul>
       </article>
 
       <article class="qs-card">
         <h3>Diretrizes</h3>
         <ul class="qs-list">
-          <li>
-            <span class="qs-ico"><i class="bi bi-compass-fill"></i></span>
-            <span>Simplificar processos e reduzir burocracia</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-laptop-fill"></i></span>
-            <span>Digitalizar serviços com foco em usabilidade</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-shield-lock-fill"></i></span>
-            <span>Fortalecer a governança e a conformidade</span>
-          </li>
+          <li><span class="qs-ico"><i class="bi bi-compass-fill"></i></span><span>Simplificar processos e reduzir burocracia</span></li>
+          <li><span class="qs-ico"><i class="bi bi-laptop-fill"></i></span><span>Digitalizar serviços com foco em usabilidade</span></li>
+          <li><span class="qs-ico"><i class="bi bi-shield-lock-fill"></i></span><span>Fortalecer a governança e a conformidade</span></li>
         </ul>
       </article>
     </div>
@@ -257,106 +158,95 @@
 
   <!-- O que fazemos -->
   <section aria-labelledby="qs-fazemos">
-    <h2 id="qs-fazemos" style="margin: 0.5rem 0 0.25rem">O que fazemos</h2>
+    <h2 id="qs-fazemos" style="margin: 0.5rem 0 0.25rem"></h2>
     <div class="qs-columns">
       <div class="qs-block">
         <h3>Gestão de Pessoas</h3>
         <ul class="qs-list">
-          <li>
-            <span class="qs-ico"><i class="bi bi-people-fill"></i></span>
-            <span>Políticas de desenvolvimento e capacitação</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-file-earmark-text-fill"></i></span>
-            <span>Processos de admissão, movimentação e aposentadoria</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-receipt-cutoff"></i></span>
-            <span>Folha de pagamento e benefícios</span>
-          </li>
+          <li><span class="qs-ico"><i class="bi bi-people-fill"></i></span><span>Políticas de desenvolvimento e capacitação</span></li>
+          <li><span class="qs-ico"><i class="bi bi-file-earmark-text-fill"></i></span><span>Processos de admissão, movimentação e aposentadoria</span></li>
+          <li><span class="qs-ico"><i class="bi bi-receipt-cutoff"></i></span><span>Folha de pagamento e benefícios</span></li>
         </ul>
       </div>
+
       <div class="qs-block">
-        <h3>Gestão e Modernização</h3>
+        <h3>Superintendência</h3>
         <ul class="qs-list">
-          <li>
-            <span class="qs-ico"><i class="bi bi-puzzle-fill"></i></span>
-            <span>Padronização e redesenho de processos</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-cart-fill"></i></span>
-            <span>Compras públicas e racionalização de gastos</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-globe2"></i></span>
-            <span>Transformação digital e serviços ao cidadão</span>
-          </li>
+          <li><span class="qs-ico"><i class="bi bi-puzzle-fill"></i></span><span>Diretoria de Regularização Imobiliária</span></li>
+          <li><span class="qs-ico"><i class="bi bi-bar-chart-fill"></i></span><span>Diretoria de Gestão do Patrimônio</span></li>
+          <li><span class="qs-ico"><i class="bi bi-globe2"></i></span><span>Núcleo de Informações Geoespaciais</span></li>
         </ul>
       </div>
     </div>
   </section>
 
-  <!-- Nossos números (exemplo estático) -->
+  <!-- Nossos números -->
   <section aria-labelledby="qs-numeros">
     <h2 id="qs-numeros" style="margin: 0.5rem 0 0.25rem">Nossos números</h2>
     <div class="qs-stats" role="list">
-      <div class="qs-stat" role="listitem">
-        <strong>+120 mil</strong>
-        <span>Atendimentos/ano</span>
-      </div>
-      <div class="qs-stat" role="listitem">
-        <strong>60+</strong>
-        <span>Serviços digitais</span>
-      </div>
-      <div class="qs-stat" role="listitem">
-        <strong>100%</strong>
-        <span>Licitações eletrônicas</span>
-      </div>
-      <div class="qs-stat" role="listitem">
-        <strong>24/7</strong>
-        <span>Portal ao cidadão</span>
-      </div>
+      <div class="qs-stat" role="listitem"><strong>+70 mil</strong><span>Unidades Trabalhadas</span></div>
+      <div class="qs-stat" role="listitem"><strong>+30</strong><span>Municípios atendidos</span></div>
+      <div class="qs-stat" role="listitem"><strong>100%</strong><span>Processo digital</span></div>
+      <div class="qs-stat" role="listitem"><strong>+100</strong><span>Atendimentos/Dia</span></div>
     </div>
   </section>
 
   <!-- Estrutura & Contatos -->
   <section aria-labelledby="qs-contatos">
-    <h2 id="qs-contatos" style="margin: 0.5rem 0 0.25rem">
-      Estrutura e contatos
-    </h2>
+    <h2 id="qs-contatos" style="margin: 0.5rem 0 0.25rem">Estrutura</h2>
     <div class="qs-columns">
       <div class="qs-block">
-        <h3>Unidades</h3>
+        <h3>Regularização Imobiliária</h3>
         <ul class="qs-list">
-          <li>
-            <span class="qs-ico"><i class="bi bi-building"></i></span>
-            <span>Gabinete da Secretaria</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-person-badge-fill"></i></span>
-            <span>Superintendência de Gestão de Pessoas</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-gear-fill"></i></span>
-            <span>Superintendência de Modernização e Inovação</span>
-          </li>
-          <li>
-            <span class="qs-ico"><i class="bi bi-briefcase-fill"></i></span>
-            <span>Diretoria de Licitações e Compras</span>
-          </li>
+          <li><span class="qs-ico"><i class="bi bi-building"></i></span><span>Gerência de Análise de Imóveis</span></li>
+          <li><span class="qs-ico"><i class="bi bi-person-badge-fill"></i></span><span>Gerência de Regularização Fundiária e Cadastramento</span></li>
+          <li><span class="qs-ico"><i class="bi bi-gear-fill"></i></span><span>Gerência de Operações Técnicas</span></li>
+          <li><span class="qs-ico"><i class="bi bi-receipt-cutoff"></i></span><span>Central de Cartórios</span></li>
         </ul>
       </div>
+
       <div class="qs-block">
-        <h3>Fale conosco</h3>
+        <h3>Gestão do Patrimônio</h3>
+        <ul class="qs-list">
+          <li><span class="qs-ico"><i class="bi bi-building"></i></span><span>Gerência</span></li>
+          <li><span class="qs-ico"><i class="bi bi-person-badge-fill"></i></span><span>Gerência</span></li>
+          <li><span class="qs-ico"><i class="bi bi-gear-fill"></i></span><span>Gerência</span></li>
+          <li><span class="qs-ico"><i class="bi bi-receipt-cutoff"></i></span><span>Gerência</span></li>
+        </ul>
+      </div>
+
+      <!-- PERFIL da Superintendente (agora como .qs-block para padronizar tamanho) -->
+      <div class="qs-block qs-profile">
+        <div class="qs-prof-head">
+          <img class="qs-prof-avatar"
+               src="https://conectapiaui.com.br/media/image_bank/2024/3/thumbs/carol-viveiros_WVjDPVx.png.1200x0_q95_crop.png"
+               alt="Foto da Superintendente" loading="lazy">
+          <div>
+            <div class="qs-prof-role">Superintendente</div>
+            <div class="qs-prof-name">Caroline Viveiros Moura da Cruz</div>
+          </div>
+        </div>
+
+        <ul class="qs-list" style="margin-top:.25rem">
+          <li><span class="qs-ico"><i class="bi bi-telephone-fill"></i></span><span>Telefone não informado</span></li>
+          <li><span class="qs-ico"><i class="bi bi-envelope-fill"></i></span><a href="mailto:sead@pi.gov.br">sead@pi.gov.br</a></li>
+          <li><span class="qs-ico"><i class="bi bi-clock-fill"></i></span><span>7h30 às 13h30</span></li>
+          <li><span class="qs-ico"><i class="bi bi-link-45deg"></i></span><a href="https://www.sead.pi.gov.br" target="_blank" rel="noopener">sead.pi.gov.br</a></li>
+          <li><span class="qs-ico"><i class="bi bi-geo-alt-fill"></i></span><span>Av. Pedro Freitas 1900 (São Pedro), Teresina, PI</span></li>
+        </ul>
+      </div>
+
+      <div class="qs-block">
+        <h3>Contatos</h3>
         <dl class="qs-dl">
-          <dt>Ouvidoria / e-SIC</dt>
-          <dd><a href="?page=contato#ouvidoria">Acesse o canal oficial</a></dd>
+          <dt>Instagram</dt>
+          <dd><a href="https://www.instagram.com/patrimonio.seadpi/">@patrimonio.seadpi</a></dd>
           <dt>E-mail</dt>
-          <dd><a href="mailto:sead@pi.gov.br">sead@pi.gov.br</a></dd>
+          <dd><a href="mailto:sead@pi.gov.br">Sead@sead.pi.gov.br</a></dd>
           <dt>Telefone</dt>
-          <dd>(86) 0000-0000</dd>
+          <dd>(86) 9 9520-1821</dd>
           <dt>Endereço</dt>
-          <dd>Endereço • CEP • Teresina — PI</dd>
+          <dd>Av. Pedro Freitas 1900 (São Pedro), Teresina, PI</dd>
         </dl>
       </div>
     </div>

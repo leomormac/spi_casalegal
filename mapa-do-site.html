@@ -1,29 +1,34 @@
-<section>
+<section class="mapa-site">
   <h1 id="titulo-mapa-do-site">Mapa do site</h1>
-  <p class="small" style="color:#64748b">Atalhos para todas as páginas e seções principais do portal.</p>
+  <p class="small" style="color:#64748b">
+    Atalhos para todas as páginas e seções principais do portal.
+  </p>
 
-  <div class="cards" style="margin-top:1rem">
-    <div class="card">
-      <h3>Institucional</h3>
+  <div class="mapa-grid">
+    <div class="mapa-col">
+      <h3>Início</h3>
       <ul>
         <li><a href="?page=home">Início</a></li>
         <li><a href="?page=quem-somos">Quem Somos</a></li>
         <li><a href="?page=noticias">Notícias</a></li>
-        <li><a href="?page=mapa">Mapa de Atuação</a></li>
       </ul>
     </div>
 
-    <div class="card">
+    <div class="mapa-col">
       <h3>Transparência</h3>
       <ul>
         <li><a href="https://transparencia.pi.gov.br/ords/f?p=101:1::::::" target="_blank" rel="noopener">Portal da Transparência</a></li>
-        <li><a href="?page=lgpd">LGPD</a></li>
-        <li><a href="?page=editais#despesas">Receitas e Despesas</a></li>
-        <li><a href="?page=editais#licitacoes">Licitações e Contratos</a></li>
       </ul>
     </div>
 
-    <div class="card">
+    <div class="mapa-col">
+      <h3>Resultados</h3>
+      <ul>
+        <li><a href="https://majestic-duckanoo-b4cb2b.netlify.app/" target="_blank" rel="noopener">Resultados</a></li>
+      </ul>
+    </div>
+
+    <div class="mapa-col">
       <h3>Casa Legal</h3>
       <ul>
         <li><a href="?page=como-participar">Como Participar</a></li>
@@ -32,7 +37,7 @@
       </ul>
     </div>
 
-    <div class="card">
+    <div class="mapa-col">
       <h3>Outros Portais</h3>
       <ul>
         <li><a href="https://www.pi.gov.br/" target="_blank" rel="noopener">Governo do Piauí</a></li>
@@ -41,3 +46,53 @@
     </div>
   </div>
 </section>
+
+<style>
+  .mapa-site {
+    max-width: var(--container);
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .mapa-site h1 {
+    color: #0a489b;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .mapa-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    margin-top: 1.5rem;
+  }
+
+  .mapa-col h3 {
+    margin-bottom: 0.75rem;
+    font-size: 1.15rem;
+    color: #0a489b;
+    border-bottom: 2px solid #e6edf8;
+    padding-bottom: 0.3rem;
+  }
+
+  .mapa-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mapa-col ul li {
+    margin-bottom: 0.4rem;
+  }
+
+  .mapa-col ul li a {
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .mapa-col ul li a:hover {
+    color: #0a489b;
+    text-decoration: underline;
+  }
+</style>

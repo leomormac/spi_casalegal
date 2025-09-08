@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><?= pageTitle ?> — Secretaria — Governo do Estado do Piauí</title>
+    <title><?= pageTitle ?> — Superintendência de Patrimônio Imobiliário</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -33,7 +33,7 @@
   }
   * { box-sizing: border-box; }
   html { font-family: Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--ink); height: 100%; }
-  body { margin: 0; background: #fff; min-height: 100vh; display: flex; flex-direction: column; }
+  body { margin: 0; background: #ffff; min-height: 100vh; display: flex; flex-direction: column; }
   #miolo { flex: 1 0 auto; text-align: left; }
   a { color: #0a489b; text-decoration: none; }
   a:focus, button:focus { outline: 3px solid #ffd; outline-offset: 2px; }
@@ -45,7 +45,7 @@
   .access button { border: 1px solid var(--steel); background: #fff; padding: 0.2rem 0.5rem; border-radius: 6px; cursor: pointer; }
 
   header .inner { max-width: var(--container); margin: 0 auto; display: grid; grid-template-columns: 280px 1fr 220px; gap: 1.5rem; align-items: center; height: 115px; padding: 0 1rem; position: relative; }
-  .brand img { height: 90px; width: auto; }
+  .brand img { height: 100px; width: auto; }
   .search { flex: 1; display: flex; justify-content: center; max-width: 600px; position: relative; }
   .search input {
     flex: 1; max-width: 600px; padding: 1.2rem 2.5rem 1.2rem 1rem; font-size: 1rem; font-family: "Montserrat", sans-serif; font-weight: 400;
@@ -109,7 +109,7 @@
   footer h4 { margin: 0 0 0.8rem; font-weight: 800; text-transform: uppercase; font-size: 1rem; }
   footer a { color: #fff; }
   .footer-brand { display: flex; align-items: center; gap: 0.75rem; }
-  .footer-brand img { height: 110px; width: auto; filter: brightness(0) invert(1); }
+  .footer-brand img { height: 70px; width: auto; filter: brightness(0) invert(1); }
   .divider { border-top: 1px solid rgba(255, 255, 255, 0.22); margin: 1rem 0; }
   .govbar { background: #083b82; color: #e5e7eb; }
   .govbar .inner { max-width: var(--container); margin: 0 auto; padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
@@ -352,7 +352,7 @@
     <header role="banner">
       <div class="inner">
         <div class="brand">
-          <img src="https://i.postimg.cc/3NHjKYHw/LOGO-CASA-LEGAL.png" alt="Governo do Piauí" width="200" height="90" loading="lazy" onerror="this.style.display='none'" />
+          <img src="https://i.postimg.cc/MGhvCTL3/casaleagal-pi.png" alt="Governo do Piauí" width="200" height="90" loading="lazy" onerror="this.style.display='none'" />
         </div>
         <div class="search" role="search" aria-label="Busca no portal">
           <input id="buscaSite" type="search" placeholder="O que você procura?" aria-label="Buscar no site" />
@@ -416,14 +416,13 @@
             </div>
           </div>
           <div class="divider"></div>
-          <div class="small">Endereço • CEP • Teresina — PI • Telefone</div>
+          <div class="small">Av. Pedro Freitas 1900 (São Pedro), Teresina, PI • Telefone (86) 9 9520-1821</div>
         </div>
         <div>
           <h4>Institucional</h4>
           <ul class="footer-list">
             <li><a href="?page=quem-somos">Quem somos</a></li>
-            <li><a href="?page=institucional#unidades">Unidades e contatos</a></li>
-            <li><a href="?page=institucional#agenda">Agenda da autoridade</a></li>
+            <li><a href="https://majestic-duckanoo-b4cb2b.netlify.app/">Resultados</a></li>
           </ul>
         </div>
         <div>
@@ -431,16 +430,13 @@
           <ul class="footer-list">
             <li><a href="https://transparencia.pi.gov.br/ords/f?p=101:1::::::" target="_blank" rel="noopener">Portal da Transparência</a></li>
             <li><a href="?page=lgpd">LGPD</a></li>
-            <li><a href="?page=contato#ouvidoria">Ouvidoria / e-SIC</a></li>
-            <li><a href="?page=editais#despesas">Receitas e Despesas</a></li>
           </ul>
         </div>
         <div>
           <h4>Serviços</h4>
           <ul class="footer-list">
             <li><a href="?page=portais#portal-servidor">Portal do Servidor</a></li>
-            <li><a href="?page=editais#licitacoes">Licitações e Contratos</a></li>
-            <li><a href="?page=portais#sei">Acesso ao SEI</a></li>
+            <li><a href=" https://portal.pi.gov.br/sei/">Acesso ao SEI</a></li>
           </ul>
         </div>
       </div>
@@ -448,9 +444,8 @@
         <div class="inner">
           <div>© Governo do Estado do Piauí — Todos os direitos reservados</div>
           <div style="display: flex; gap: 1rem; flex-wrap: wrap">
-            <a href="#mapa">Mapa do site</a>
-            <a href="?page=lgpd#politica">Política de Privacidade</a>
-            <a href="#acessibilidade">Acessibilidade</a>
+            <a href="https://www.sead.pi.gov.br/politica-de-privacidade">Política de Privacidade</a>
+            <a href="https://www.pi.gov.br/acessibilidade/">Acessibilidade</a>
           </div>
         </div>
       </div>
