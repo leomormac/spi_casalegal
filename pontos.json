@@ -1,6 +1,7 @@
 {"type":"FeatureCollection", "features": [
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-42.7646205196289,-5.087295426425782]},"properties":{"lat":-5.087295,"lon":-42.764621,"municipio":"Teresina","status":"Ativo","info":"Em Andamento"}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-41.87799301062243,-7.639021493219614]},"properties":{"lat":-7.639021,"lon":-41.877993,"municipio":"Campinas do Piauí","status":"Ativo","info":"Em Andamento"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-41.87799301062243,-7.639021493219614]},"properties":{"lat":-7.639021,"lon":-41.877993,"municipio":"Campinas do Piauí","status":"Ativo","info":"Em Andamento"}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-43.968082494118455,-8.789329362312479]},"properties":{"lat":-8.789329,"lon":-43.968082,"municipio":"Cristino Castro","status":"Ativo","info":"Em Andamento"}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-42.173867746943095,-4.853816042662527]},"properties":{"lat":-4.853816,"lon":-42.173868,"municipio":"Campo Maior","status":"Ativo","info":"Em Andamento"}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-44.620524220364025,-7.816356671719504]},"properties":{"lat":-7.816357,"lon":-44.620524,"municipio":"Uruçuí","status":"Ativo","info":"Em Andamento"}},
@@ -23,5 +24,6 @@
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-44.60535115696295,-9.185725643665169]},"properties":{"lat":-9.185726,"lon":-44.605351,"municipio":"Bom Jesus","status":"Ativo","info":"Em Andamento"}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-42.19804981673852,-4.631435832190739]},"properties":{"lat":-4.631436,"lon":-42.19805,"municipio":"Nossa Senhora de Nazaré","status":"Ativo","info":"Em Andamento"}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-42.45172447047499,-3.812090408533498]},"properties":{"lat":-3.81209,"lon":-42.451724,"municipio":"São João do Arraial","status":"Ativo","info":"Em Andamento"}},
-{"type":"Feature","geometry":{"type":"Point","coordinates":[-41.9377369477641,-5.290041615443003]},"properties":{"lat":-5.290042,"lon":-41.937737,"municipio":"Novo Santo Antônio","status":"Ativo","info":"Em Andamento"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-41.9377369477641,-5.290041615443003]},"properties":{"lat":-5.290042,"lon":-41.937737,"municipio":"Novo Santo Antônio","status":"Ativo","info":"Em Andamento"}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-45.73264233182437,-8.983024474950591]},"properties":{"lat":-8.983024,"lon":-45.732642,"municipio":"Santa Filomena","status":"Ativo","info":"Em Andamento"}}
 ]}

@@ -321,6 +321,13 @@
     50% { transform: scale(1.25); }
     100% { transform: scale(1); }
   }
+  /* Pulso do título do Regularizômetro */
+#regzTitle.pulse {
+  display: inline-block;        /* permite o transform */
+  animation: pulse 0.8s ease-out 3; /* 3 “batidas” */
+  transform-origin: center;
+}
+
     </style>
   </head>
 
@@ -341,7 +348,7 @@
             <img src="https://i.postimg.cc/3NHjKYHw/LOGO-CASA-LEGAL.png" alt="Logo do Programa" />
           </div>
           <div class="regz-title">
-            <span id="regzTitle">Regularizômetro</span>
+            <span id="regzTitle">REGULARIZÔMETRO</span>
           </div>
           <div class="regz-actions">
             <button id="regzClose" type="button" title="Fechar">Fechar</button>
@@ -355,7 +362,7 @@
               <strong id="regzMeta">–</strong>
             </div>
             <div class="regz-kpi">
-              <small>Alcançado</small>
+              <small>Unidades trabalhadas</small>
               <strong id="regzAtual">–</strong>
             </div>
             <div class="regz-kpi">
@@ -879,8 +886,34 @@
   // ======= Utils UI =======
   const br = (n)=> Number(n||0).toLocaleString('pt-BR');
   const clamp = (v,min,max)=> Math.max(min, Math.min(max, v));
-  function openModal(){ $back.classList.add('open'); $modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
-  function closeModal(){ $back.classList.remove('open'); $modal.classList.remove('open'); document.body.style.overflow = ''; }
+
+  // Loop infinito do título enquanto o modal estiver aberto
+  function pulseTitleInfinite(on=true, durMs=1200){
+    const t = document.getElementById('regzTitle');
+    if (!t) return;
+    if (on){
+      t.style.display = 'inline-block';
+      t.style.transformOrigin = 'center';
+      t.style.animation = 'none';
+      void t.offsetWidth; // reflow para reiniciar
+      t.style.animation = `pulse ${durMs}ms ease-in-out infinite`;
+    } else {
+      t.style.animation = 'none';
+    }
+  }
+
+  function openModal(){ 
+    $back.classList.add('open'); 
+    $modal.classList.add('open'); 
+    document.body.style.overflow = 'hidden'; 
+    pulseTitleInfinite(true);       // inicia o loop
+  }
+  function closeModal(){ 
+    $back.classList.remove('open'); 
+    $modal.classList.remove('open'); 
+    document.body.style.overflow = ''; 
+    pulseTitleInfinite(false);      // interrompe o loop
+  }
   document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeModal(); });
 
   // Datas
@@ -969,9 +1002,11 @@
     const { duration = 900, turnsBase = 1, turnsRand = 1 } = opts;
     const host = ensureRollHost(el);
     if (!host) return;
+
     const parts = String(
       typeof value === 'number' ? value.toLocaleString('pt-BR') : (value ?? '')
     ).split('');
+
     let iDom = 0;
     for (let i = 0; i < parts.length; i++){
       const ch = parts[i];
@@ -1005,7 +1040,6 @@
       setTimeout(() => host.classList.remove('pulse'), 600);
     }, delay);
   }
-  function animateNumber(){}
 
   function updateUI({meta, atual, atualizado_em}){
     const m = Number(meta||0);
@@ -1055,13 +1089,13 @@
     const iUpd   = head.findIndex(h => ['atualizado_em','atualizacao','atualizado','updated','last_update','data'].includes(h));
 
     const row = rows[1] || [];
-    const atual = iAtual>=0 ? row[iAtual] : row[0];
+    const theAtual = iAtual>=0 ? row[iAtual] : row[0];
     const meta  = iMeta >=0 ? row[iMeta]  : row[1];
     const atualizado_em = iUpd>=0 ? row[iUpd] : '';
 
     const normNum = (v)=> String(v??'').replace(/[^\d.,-]/g,'').replace(/\./g,'').replace(',', '.');
 
-    return { meta: normNum(meta), atual: normNum(atual), atualizado_em };
+    return { meta: normNum(meta), atual: normNum(theAtual), atualizado_em };
   }
 
   // ======= MAPA no modal (Leaflet) =======
@@ -1104,7 +1138,6 @@
       addPointFeature(data);
     }
   }
-
   async function loadMunicipios(){
     if (MUNICIPIOS_GEOJSON_URL) {
       const r = await fetch(MUNICIPIOS_GEOJSON_URL, { cache:'no-cache' });
@@ -1112,7 +1145,6 @@
       const gj = await r.json();
       if (regzMuniLayer) regzMap.removeLayer(regzMuniLayer);
       regzMuniLayer = L.geoJSON(gj, {
-        pane: 'paneMunicipios',
         style: ()=>({ color:'#0a489b', weight:1, opacity:.85, fillColor:'#4ade80', fillOpacity:.12 })
       }).addTo(regzMap);
       regzLayersCtrl?.addOverlay(regzMuniLayer, 'Municípios do Piauí');
@@ -1123,7 +1155,6 @@
         : { type:'FeatureCollection', features:Object.values(gj).flatMap(g => g.features || []) };
       if (regzMuniLayer) regzMap.removeLayer(regzMuniLayer);
       regzMuniLayer = L.geoJSON(fc, {
-        pane: 'paneMunicipios',
         style: ()=>({ color:'#0a489b', weight:1, opacity:.85, fillColor:'#4ade80', fillOpacity:.12 })
       }).addTo(regzMap);
       regzLayersCtrl?.addOverlay(regzMuniLayer, 'Municípios');
@@ -1138,10 +1169,10 @@
 
     if (regzExtraLayer) {
       try { regzMap.removeLayer(regzExtraLayer); } catch {}
+      try { regzLayersCtrl?.removeLayer(regzExtraLayer); } catch {}
     }
 
     regzExtraLayer = L.geoJSON(gj, {
-      pane: 'paneAtendidos',               // <<<<< camada de atendidos acima
       style: () => ({
         color: '#1050a0',
         weight: 2,
@@ -1159,7 +1190,7 @@
       }
     }).addTo(regzMap);
 
-    regzExtraLayer.bringToFront(); // reforça a ordem
+    try { regzExtraLayer.bringToFront(); } catch {}
     regzLayersCtrl?.addOverlay(regzExtraLayer, 'Municípios Atendidos');
   }
 
@@ -1171,14 +1202,6 @@
     regzMap = L.map(el, { zoomControl:true, minZoom:5, maxZoom:19 });
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       { maxZoom:20, attribution:'© OpenStreetMap · © Carto' }).addTo(regzMap);
-
-    // === Ordem de desenho via panes (z-index) ===
-    regzMap.createPane('paneMunicipios');
-    regzMap.getPane('paneMunicipios').style.zIndex = 410;
-    regzMap.getPane('paneMunicipios').style.pointerEvents = 'none'; // evita bloquear cliques
-
-    regzMap.createPane('paneAtendidos');
-    regzMap.getPane('paneAtendidos').style.zIndex = 420; // acima dos municípios
 
     regzLayersCtrl = L.control.layers(null, {}, { collapsed: false }).addTo(regzMap);
 
@@ -1195,11 +1218,6 @@
       .catch(console.warn);
 
     loadExtraLayer().catch(console.warn);
-
-    // Se o usuário ligar/desligar camadas no controle, mantém atendidos por cima
-    regzMap.on('overlayadd', (e) => {
-      if (e.layer === regzExtraLayer) regzExtraLayer.bringToFront();
-    });
 
     regzMapBooted = true;
   }
@@ -1240,6 +1258,8 @@
 
 })();
 </script>
+
+
 
     <!-- Leaflet + MarkerCluster (JS global para o SPA) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
