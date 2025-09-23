@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 
     <!--favicon-->
-    <link rel="icon" type="image/png" href="/casalegal-favicon.png">
+    <link rel="icon" type="image/png" href="casalegal-favicon.png">
 
     <style>
   :root {
@@ -194,7 +194,7 @@
   .regz-modal.open { pointer-events: auto; }
 
   .regz-card {
-    width: min(720px, 92vw);
+    width: min(1400px, 98vw);
     background: #fff; border: 1px solid #e6edf8; border-radius: 16px;
     box-shadow: var(--shadow);
     padding: 1.25rem 1.25rem 1rem;
@@ -328,6 +328,36 @@
   transform-origin: center;
 }
 
+/* Botão "Ver Resultados" no modal */
+.btn-resultados{
+  display:inline-block;
+  background:#0a489b;
+  color:#fff;
+  padding:.7rem 1.5rem;
+  border-radius:8px;
+  font-weight:600;
+  font-family:inherit;
+  text-decoration:none;
+  transition:background .2s ease, transform .08s ease;
+}
+.btn-resultados:hover{ background:#083b82; }
+.btn-resultados:active{ transform: translateY(1px); }
+
+/* Página Resultados: liberar o miolo para tela cheia */
+body.page-resultados #miolo {
+  max-width: none !important;
+  width: 100vw;
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+body.page-resultados #miolo section {
+  margin: 0;
+  padding: 0;
+}
+
+
+
     </style>
   </head>
 
@@ -376,6 +406,11 @@
           <!-- Mapa dentro do modal -->
           <div id="regzMap" role="region" aria-label="Mapa de atuação (Regularizômetro)"></div>
         </div>
+
+        <!-- Botão para a página de Resultados -->
+<div style="margin-top:1rem; text-align:center;">
+  <a href="?page=resultados" id="goResultados" class="btn-resultados">Acompanhe aqui onde estamos</a>
+</div>
 
         <div class="regz-foot">
           <div>Atualizado em <span id="regzUpdated">–</span></div>
@@ -428,21 +463,21 @@
       <div class="inner">
         <ul class="menu" id="mainMenu">
           <li><a href="?page=home">Início</a></li>
-          <li><a href="?page=quem-somos">Quem Somos</a></li>
-          <li><a href="?page=noticias">Notícias</a></li>
-          <li><a href="https://transparencia.pi.gov.br/ords/f?p=101:1::::::" target="_blank" rel="noopener">Transparência</a></li>
-          <li><a href="https://majestic-duckanoo-b4cb2b.netlify.app/" target="_blank" rel="noopener">Resultados</a></li>
+<li><a href="?page=quem-somos">Quem Somos</a></li>
+<li><a href="?page=noticias">Notícias</a></li>
+<li><a href="https://transparencia.pi.gov.br/ords/f?p=101:1::::::" target="_blank" rel="noopener">Transparência</a></li>
 
-          <!-- Botão no menu que abre o Regularizômetro -->
-          <li><a href="#" id="btnRegularizometro">Regularizômetro</a></li>
+<li>
+  <a href="?page=casa-legal" aria-haspopup="true" aria-expanded="false">Casa Legal <span class="chev">▾</span></a>
+  <div class="submenu" role="menu">
+     <a href="?page=como-participar" role="menuitem">Como Participar</a>
+     <a href="?page=sobre-o-programa" role="menuitem">Sobre o Programa</a>
+     <a href="?page=entregas" role="menuitem">Entregas</a>
+     <a href="?page=resultados" role="menuitem">Resultados</a>
+     <a href="#" id="btnRegularizometro" role="menuitem">Regularizômetro</a>
+  </div>
+</li>
 
-          <li>
-            <a href="?page=casa-legal" aria-haspopup="true" aria-expanded="false">Casa Legal <span class="chev">▾</span></a>
-          <div class="submenu" role="menu">
-             <a href="?page=como-participar" role="menuitem">Como Participar</a>
-             <a href="?page=sobre-o-programa" role="menuitem">Sobre o Programa</a>
-             <a href="?page=entregas" role="menuitem">Entregas</a>
-          </div>
           </li>
         </ul>
       </div>
@@ -589,7 +624,9 @@
         "mapa-do-site":  { file: "mapa-do-site.html", title: "Mapa do site" },
         "como-participar": { file: "como-participar.html", title: "Como participar" },
         "sobre-o-programa": { file: "sobre-o-programa.html", title: "Sobre o Programa" },
-        entregas:        { file: "entregas.html", title: "Entregas" }
+        entregas:        { file: "entregas.html", title: "Entregas" },
+        resultados: { file: "resultados.html", title: "Resultados" }
+
       };
 
       const norm = (s) => (s || '').toString()
@@ -875,6 +912,8 @@
   const $btnFloat= document.getElementById('btnOpenRegularizometro');
   const $btnMenu = document.getElementById('btnRegularizometro');
   const $btnClose= document.getElementById('regzClose');
+  const $goResultados = document.getElementById('goResultados');
+
 
   const $meta  = document.getElementById('regzMeta');
   const $atual = document.getElementById('regzAtual');
@@ -1251,6 +1290,11 @@
   $btnMenu?.addEventListener('click',  (e)=>{ e.preventDefault(); openAndFetch(); });
   $btnClose?.addEventListener('click', closeModal);
   $back?.addEventListener('click', closeModal);
+  $goResultados?.addEventListener('click', () => {
+  closeModal(); // fecha o modal
+  // deixa o SPA continuar e carregar ?page=resultados
+});
+
 
   document.addEventListener("DOMContentLoaded", () => {
     openAndFetch();

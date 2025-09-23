@@ -1,7 +1,6 @@
 {"type":"FeatureCollection", "features": [
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-42.7646205196289,-5.087295426425782]},"properties":{"lat":-5.087295,"lon":-42.764621,"municipio":"Teresina","status":"Ativo","info":"Em Andamento"}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-41.87799301062243,-7.639021493219614]},"properties":{"lat":-7.639021,"lon":-41.877993,"municipio":"Campinas do Piauí","status":"Ativo","info":"Em Andamento"}},
-{"type":"Feature","geometry":{"type":"Point","coordinates":[-41.87799301062243,-7.639021493219614]},"properties":{"lat":-7.639021,"lon":-41.877993,"municipio":"Campinas do Piauí","status":"Ativo","info":"Em Andamento"}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-43.968082494118455,-8.789329362312479]},"properties":{"lat":-8.789329,"lon":-43.968082,"municipio":"Cristino Castro","status":"Ativo","info":"Em Andamento"}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-42.173867746943095,-4.853816042662527]},"properties":{"lat":-4.853816,"lon":-42.173868,"municipio":"Campo Maior","status":"Ativo","info":"Em Andamento"}},
 {"type":"Feature","geometry":{"type":"Point","coordinates":[-44.620524220364025,-7.816356671719504]},"properties":{"lat":-7.816357,"lon":-44.620524,"municipio":"Uruçuí","status":"Ativo","info":"Em Andamento"}},

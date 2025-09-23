@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Resultados</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%; width: 100%;
+    }
+    /* container interno só para darmos um respiro acima do iframe */
+    .wrap {
+      margin: 0; padding: 8px 0 0; /* 8px em cima para o gráfico não “pegar” a barra */
+    }
+    #frameResultados {
+      width: 99%;
+      border: none;
+      display: block;
+      min-height: 400px; /* segurança */
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <iframe
+      id="frameResultados"
+      src="https://majestic-duckanoo-b4cb2b.netlify.app/"
+      scrolling="auto"
+      title="Resultados">
+    </iframe>
+  </div>
+
+  <script>
+    // Calcula a altura disponível sem subtrair o rodapé (assim o rodapé some ao rolar)
+    (function () {
+      const iframe = document.getElementById('frameResultados');
+
+      function resize() {
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+
+        // Somatório do topo da página (barra utilitária, header, nav e breadcrumb)
+        const util   = document.querySelector('.utility');
+        const header = document.querySelector('header');
+        const nav    = document.querySelector('.nav');
+        const bc     = document.querySelector('.breadcrumb');
+
+        const topSum =
+          (util?.offsetHeight   || 0) +
+          (header?.offsetHeight || 0) +
+          (nav?.offsetHeight    || 0) +
+          (bc?.offsetHeight     || 0);
+
+        // Altura do iframe = viewport - tudo que está acima
+        // (NÃO subtrai o footer, para que ele saia de vista quando rolar)
+        const h = Math.max(500, vh - topSum + 250);
+        iframe.style.height = h + 'px';
+      }
+
+      window.addEventListener('resize', resize);
+      window.addEventListener('orientationchange', resize);
+      // roda ao injetar a página no SPA
+      setTimeout(resize, 0);
+    })();
+  </script>
+</body>
+</html>
