@@ -1,31 +1,47 @@
 <!-- home.html -->
 <section class="hero" aria-label="Destaques">
-  <div class="carousel" id="carousel">
+  <div class="carousel" id="carousel" aria-roledescription="carousel">
+    <!-- slide 1 -->
     <div class="slide active">
       <a href="https://www.sead.pi.gov.br/programa-casa-legal-e-destaque-na-6a-conferencia-nacional-das-cidades" target="_blank" rel="noopener">
-        <img src="https://www.pi.gov.br/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-14.47.28-1536x1152.jpeg"
-             alt="Programa Casa Legal é destaque na 6ª Conferência Nacional das Cidades"
-             style="width:100%;height:420px;object-fit:cover">
+        <img
+          src="https://www.pi.gov.br/wp-content/uploads/2025/08/WhatsApp-Image-2025-08-20-at-14.47.28-1536x1152.jpeg"
+          alt="Programa Casa Legal é destaque na 6ª Conferência Nacional das Cidades"
+          fetchpriority="high" decoding="async"
+          style="width:100%;height:420px;object-fit:cover">
         <div class="caption">Programa Casa Legal é destaque na 6ª Conferência Nacional das Cidades</div>
       </a>
     </div>
+
+    <!-- slide 2 -->
     <div class="slide">
       <a href="https://www.pi.gov.br/sead-vai-regularizar-2-mil-imoveis-no-bairro-santa-maria-da-codipi-com-o-casa-legal/" target="_blank" rel="noopener">
-        <img src="https://i.postimg.cc/v8vrf1FY/Whats-App-Image-2025-08-01-at-19-41-29-1024x683.jpg"
-             alt="Sead vai regularizar 2 mil imóveis no bairro Santa Maria da Codipi com o Casa Legal"
-             style="width:100%;height:420px;object-fit:cover">
+        <img
+          src="https://i.postimg.cc/v8vrf1FY/Whats-App-Image-2025-08-01-at-19-41-29-1024x683.jpg"
+          alt="Sead vai regularizar 2 mil imóveis no bairro Santa Maria da Codipi com o Casa Legal"
+          loading="lazy" decoding="async"
+          style="width:100%;height:420px;object-fit:cover">
         <div class="caption">Sead vai regularizar 2 mil imóveis no bairro Santa Maria da Codipi com o Casa Legal</div>
       </a>
     </div>
+
+    <!-- slide 3 -->
     <div class="slide">
       <a href="https://www.pi.gov.br/rafael-fonteles-entrega-mil-registros-de-imoveis-em-piripiri-e-celebra-70-mil-titulos-em-todo-o-piaui/" target="_blank" rel="noopener">
-        <img src="https://i.postimg.cc/7LX2nyqL/piripiri.jpg"
-             alt="Rafael Fonteles entrega mil registros de imóveis em Piripiri e celebra 70 mil títulos em todo o Piauí"
-             style="width:100%;height:420px;object-fit:cover">
+        <img
+          src="https://i.postimg.cc/7LX2nyqL/piripiri.jpg"
+          alt="Rafael Fonteles entrega mil registros de imóveis em Piripiri e celebra 70 mil títulos em todo o Piauí"
+          loading="lazy" decoding="async"
+          style="width:100%;height:420px;object-fit:cover">
         <div class="caption">Rafael Fonteles entrega mil registros de imóveis em Piripiri e celebra 70 mil títulos em todo o Piauí</div>
       </a>
     </div>
+
+    <!-- controles + indicadores -->
+    <button class="nav prev" aria-label="Slide anterior" type="button">‹</button>
+    <button class="nav next" aria-label="Próximo slide" type="button">›</button>
     <div class="dots" id="dots"></div>
+    <div class="progress" id="progress"><span></span></div>
   </div>
 </section>
 
@@ -35,7 +51,7 @@
   <article class="bio-left">
     <div class="bio-card">
       <div class="bio-header">
-        <img class="bio-avatar" src="https://imghost.com.br/ib/gdiY7JKCHYvwhzp_1757435592.jpeg" alt="Foto da Superintendente" loading="lazy">
+        <img class="bio-avatar" src="https://i.postimg.cc/kMb8MWBL/carol.jpg" alt="Foto da Superintendente" loading="lazy">
         <div class="bio-ident">
           <div class="bio-role">Superintendente</div>
           <div class="bio-name">Caroline Viveiros Moura da Cruz</div>
@@ -121,204 +137,217 @@
 
 <!-- estilos específicos da home -->
 <style>
- /* ===== CARROSSEL (horizontal, sem flash) ===== */
-.carousel{
+ /* ===== CARROSSEL (suave + acessível) ===== */
+ .carousel{
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 14px;
   height: 420px;
-  background:#000;              /* evita branco de fundo */
+  background:#000;
+  box-shadow: 0 10px 30px rgba(2,8,23,.12);
+  isolation: isolate;
 }
-
 .carousel .slide{
-  position: absolute;
-  inset: 0;
-  display: block;
-  /* GPU + suavidade */
+  position: absolute; inset: 0;
+  transform: translate3d(100%,0,0);
   will-change: transform;
   backface-visibility: hidden;
-  transform: translate3d(100%,0,0);  /* todos começam fora (direita) */
   z-index: 1;
 }
-.carousel .slide.active{
-  transform: translate3d(0,0,0);
-  z-index: 2;
-}
-
+.carousel .slide.active{ transform: translate3d(0,0,0); z-index: 2; }
 .carousel .slide img{
-  position:absolute;
-  inset:0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
+  transition: transform .8s cubic-bezier(.22,.61,.36,1);
 }
-
+.carousel .slide.active img{ transform: scale(1.01); }
 .carousel .caption{
-  position: absolute; left: 0; right: 0;
-  bottom: 0%; /* legenda mais alta */
-  padding: .75rem 1rem;
-  color: #fff; font-weight: 700; line-height: 1.3;
-  background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 80%);
-  pointer-events: none;
+  position:absolute; left:0; right:0; bottom:0;
+  padding: .85rem 1rem 1.25rem;
+  color:#fff; font-weight:700; line-height:1.35;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 85%);
+  text-shadow: 0 1px 2px rgba(0,0,0,.4);
+  pointer-events:none;
 }
-
+/* dots */
 .carousel .dots{
-  position: absolute;
-  left: 65%; transform: translateX(-50%);
-  bottom: 60px;                /* você pediu os dots mais altos */
-  display: flex; gap: 8px; z-index: 3;
+  position:absolute; left:65%; transform:translateX(-50%);
+  bottom:60px; display:flex; gap:10px; z-index:3;
 }
 .carousel .dot{
-  width: 9px; height: 9px; border-radius: 50%;
-  background: rgba(255,255,255,.9); cursor: pointer; opacity: .7;
+  width:9px; height:9px; border-radius:50%;
+  background:rgba(255,255,255,.7); opacity:.7; cursor:pointer;
+  transition: transform .2s ease, opacity .2s ease;
 }
-.carousel .dot.active{ opacity: 1; }
+.carousel .dot:hover{ transform:scale(1.1); opacity:.9; }
+.carousel .dot.active{ opacity:1; background:#fff; }
+/* setas */
+.carousel .nav{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:42px; height:42px; border-radius:999px; border:none;
+  background: rgba(15,23,42,.35); color:#fff; font-size:26px;
+  display:grid; place-items:center; cursor:pointer; z-index:3;
+  backdrop-filter: blur(4px);
+  transition: background .2s ease, transform .2s ease;
+}
+.carousel .nav:hover{ background: rgba(15,23,42,.55); transform:translateY(-50%) scale(1.05); }
+.carousel .nav:active{ transform:translateY(-50%) scale(.98); }
+.carousel .nav.prev{ left:10px; }
+.carousel .nav.next{ right:10px; }
+/* barra de progresso */
+.carousel .progress{
+  position:absolute; left:12px; right:12px; bottom:8px; height:3px;
+  background: rgba(255,255,255,.25); border-radius:999px; overflow:hidden; z-index:3;
+}
+.carousel .progress > span{
+  display:block; width:0%; height:100%; background:#fff;
+  transform-origin:left center;
+}
+/* movimento reduzido */
+@media (prefers-reduced-motion: reduce){
+  .carousel .slide img{ transition: none !important; }
+}
 
-
-  /* ===== HOME ===== */
-  .home-section { max-width: var(--container); margin: 1.5rem auto 0; padding: 0 1rem; }
-
-  .home-bio {
-    display: grid;
-    grid-template-columns: 0.9fr 1.1fr;
-    gap: 2rem;
-    align-items: start;
-  }
-
-  .bio-card {
-    background: #ffff;
-    border: 1px solid #ffff;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    padding: 1rem;
-  }
-  .bio-header { 
-    display: grid; 
-    grid-template-columns: 80px 1fr;
-    gap: .75rem; 
-    align-items: center; 
-  }
-
-  .bio-avatar {
-    width: 100px !important;
-    aspect-ratio: 1/1;  
-    border-radius: 50% !important;
-    object-fit: cover;  
-    display: block;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 6px rgba(0,0,0,.06);
-  }
-
-  .bio-role { font-size: .92rem; color: var(--muted); line-height: 1.2; }
-  .bio-name { font-size: 1.05rem; font-weight: 700; }
-  .bio-list { list-style: none; margin: .75rem 0 0; padding: 0; display: grid; gap: .65rem; }
-  .bio-list li { display: grid; grid-template-columns: 22px 1fr; gap: .5rem; align-items: start; }
-  .bio-list .ico {
-    width: 22px; height: 22px; display: inline-grid; place-items: center;
-    border-radius: 6px; background: #ffff; border: 1px solid #ffff;
-    font-size: .95rem; color: #0a489b;
-  }
-  .bio-list .ico i { color: #0a489b; font-size: 16px; }
-  .bio-list a { color: #0a489b; }
-
-  .bio-right h2 { margin: 0 0 .75rem; font-size: 1.5rem; color: #0a489b; }
-  .bio-right p { margin: 0 0 .9rem; line-height: 1.75; color: #334155; }
-
-  @media (max-width: 980px) {
-    .home-bio { grid-template-columns: 1fr; }
-  }
-
-  .home-cards-bar .card { text-align: left; }
-  .home-cards-bar .card h3 { margin-bottom: .5rem; }
-  .home-cards-bar .card p { margin: 0; line-height: 1.6; }
-  .home-cards-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-  }
-  .home-cards-bar .card {
-    text-align: left;
-    padding: 1rem;
-    border: 1px solid #fff;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    background: #fff;
-  }
-  .home-cards-bar .card h3 {
-    min-height: 48px;
-    margin: 0 0 .5rem;
-    display: flex;
-    align-items: flex-end;
-  }
-  .home-cards-bar .card p { margin: 0; line-height: 1.6; }
-
-  .titulo-destaque {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #0a489b;
-    margin-bottom: 1rem;
-  }
-
-  /* --- Barra de redes sociais --- */
-  .social-bar {
-    background: #ffff;
-    padding: 6rem 1rem;  /* altura do bloco rede sociais */
-    border-top: 1px solid #fff;
-    border-bottom: 1px solid #ffff;
-  }
-  .social-inner {
-    max-width: var(--container);
-    margin: 0 auto;
-    text-align: center;
-  }
-  .social-bar h2 {
-    margin: 0 0 1.5rem;
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #0a489b;
-    text-align: left;
-    white-space: normal;
-    word-break: break-word;
-  }
-  .social-icons {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 2rem;
-  }
-  .social-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: .4rem;
-    font-size: .9rem;
-    color: #334155;
-    text-decoration: none;
-  }
-  .social-item i {
-    font-size: 3.5rem;
-    color: #454545;
-    transition: color .2s;
-  }
-  .social-item:hover i { color: #454545; }
+/* ===== HOME ===== */
+.home-section { max-width: var(--container); margin: 1.5rem auto 0; padding: 0 1rem; }
+.home-bio {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 2rem;
+  align-items: start;
+}
+.bio-card {
+  background: #ffff;
+  border: 1px solid #ffff;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+.bio-header { 
+  display: grid; 
+  grid-template-columns: 80px 1fr;
+  gap: .75rem; 
+  align-items: center; 
+}
+.bio-avatar {
+  width: 100px !important;
+  aspect-ratio: 1/1;  
+  border-radius: 50% !important;
+  object-fit: cover;  
+  display: block;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
+}
+.bio-role { font-size: .92rem; color: var(--muted); line-height: 1.2; }
+.bio-name { font-size: 1.05rem; font-weight: 700; }
+.bio-list { list-style: none; margin: .75rem 0 0; padding: 0; display: grid; gap: .65rem; }
+.bio-list li { display: grid; grid-template-columns: 22px 1fr; gap: .5rem; align-items: start; }
+.bio-list .ico {
+  width: 22px; height: 22px; display: inline-grid; place-items: center;
+  border-radius: 6px; background: #ffff; border: 1px solid #ffff;
+  font-size: .95rem; color: #0a489b;
+}
+.bio-list .ico i { color: #0a489b; font-size: 16px; }
+.bio-list a { color: #0a489b; }
+.bio-right h2 { margin: 0 0 .75rem; font-size: 1.5rem; color: #0a489b; }
+.bio-right p { margin: 0 0 .9rem; line-height: 1.75; color: #334155; }
+@media (max-width: 980px) { .home-bio { grid-template-columns: 1fr; } }
+.home-cards-bar .card { text-align: left; }
+.home-cards-bar .card h3 { margin-bottom: .5rem; }
+.home-cards-bar .card p { margin: 0; line-height: 1.6; }
+.home-cards-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.home-cards-bar .card {
+  text-align: left;
+  padding: 1rem;
+  border: 1px solid #fff;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  background: #fff;
+}
+.home-cards-bar .card h3 {
+  min-height: 48px;
+  margin: 0 0 .5rem;
+  display: flex;
+  align-items: flex-end;
+}
+.home-cards-bar .card p { margin: 0; line-height: 1.6; }
+.titulo-destaque {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0a489b;
+  margin-bottom: 1rem;
+}
+/* --- Barra de redes sociais --- */
+.social-bar {
+  background: #ffff;
+  padding: 6rem 1rem;
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #ffff;
+}
+.social-inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  text-align: center;
+}
+.social-bar h2 {
+  margin: 0 0 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0a489b;
+  text-align: left;
+  white-space: normal;
+  word-break: break-word;
+}
+.social-icons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.social-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  font-size: .9rem;
+  color: #334155;
+  text-decoration: none;
+}
+.social-item i {
+  font-size: 3.5rem;
+  color: #454545;
+  transition: color .2s;
+}
+.social-item:hover i { color: #454545; }
 </style>
 
-<!-- carrossel (JS com transição horizontal) -->
+<!-- carrossel (JS com transição horizontal + progresso) -->
 <script>
 (function(){
   const car = document.getElementById('carousel');
   if (!car) return;
 
-  const slides = Array.from(car.querySelectorAll('.slide'));
-  const dotsBox = car.querySelector('#dots');
-  const INTERVAL = 5000;
-  let idx = 0, timer = null, touchStartX = null, touchStartY = null;
+  const slides   = Array.from(car.querySelectorAll('.slide'));
+  const dotsBox  = car.querySelector('#dots');
+  const prevBtn  = car.querySelector('.nav.prev');
+  const nextBtn  = car.querySelector('.nav.next');
+  const progBar  = car.querySelector('#progress > span');
+
+  const INTERVAL = 5500;            // tempo entre trocas
+  const DURATION = 650;             // duração da transição (ms)
+  const EASE     = 'cubic-bezier(.22,.61,.36,1)';
+
+  let idx = 0, timer = null;
+  let touchStartX = null, touchStartY = null, isHover = false, isInView = true;
 
   function layoutInitial(){
     slides.forEach((s,i)=>{
       s.style.transition = 'none';
-      s.style.transform  = i === idx ? 'translateX(0)' : 'translateX(100%)';
+      s.style.transform  = i === idx ? 'translate3d(0,0,0)' : 'translate3d(100%,0,0)';
+      s.style.zIndex     = i === idx ? 2 : 1;
     });
     requestAnimationFrame(()=> slides.forEach(s=> s.style.transition = ''));
   }
@@ -329,71 +358,87 @@
     slides.forEach((_, i) => {
       const d = document.createElement('div');
       d.className = 'dot' + (i === idx ? ' active' : '');
+      d.setAttribute('role','button');
+      d.setAttribute('aria-label', `Ir para o slide ${i+1}`);
+      d.tabIndex = 0;
       d.addEventListener('click', () => go(i));
+      d.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') go(i); });
       dotsBox.appendChild(d);
     });
   }
 
+  function animateProgress(){
+    if (!progBar) return;
+    progBar.style.transition = 'none';
+    progBar.style.width = '0%';
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        progBar.style.transition = `width ${INTERVAL}ms linear`;
+        progBar.style.width = '100%';
+      });
+    });
+  }
+
   function slideTo(newIndex, dir){
-  if (newIndex === idx || slides.length < 2) return;
+    if (newIndex === idx || slides.length < 2) return;
 
-  const curr = slides[idx];
-  const next = slides[newIndex];
-  const direction = dir || ((newIndex > idx) ? +1 : -1);
+    const curr = slides[idx];
+    const next = slides[newIndex];
+    const direction = dir || ((newIndex > idx) ? +1 : -1);
 
-  // prepara camadas
-  curr.style.zIndex = 2;
-  next.style.zIndex = 3;
+    curr.style.zIndex = 2;
+    next.style.zIndex = 3;
 
-  // 1) desliga transições e posiciona o próximo fora da tela
-  curr.style.transition = 'none';
-  next.style.transition = 'none';
-  next.style.transform  = `translate3d(${direction*100}%,0,0)`;
-  curr.style.transform  = 'translate3d(0,0,0)';
+    curr.style.transition = 'none';
+    next.style.transition = 'none';
+    next.style.transform  = `translate3d(${direction*100}%,0,0)`;
+    curr.style.transform  = 'translate3d(0,0,0)';
 
-  // 2) no próximo frame, liga transições e move os dois ao mesmo tempo
-  requestAnimationFrame(()=>{
-    curr.style.transition = 'transform .6s ease';
-    next.style.transition = 'transform .6s ease';
+    requestAnimationFrame(()=>{
+      curr.style.transition = `transform ${DURATION}ms ${EASE}`;
+      next.style.transition = `transform ${DURATION}ms ${EASE}`;
 
-    // anima simultâneo: atual sai, próximo entra
-    curr.style.transform = `translate3d(${-direction*100}%,0,0)`;
-    next.style.transform = 'translate3d(0,0,0)';
+      curr.style.transform = `translate3d(${-direction*100}%,0,0)`;
+      next.style.transform = 'translate3d(0,0,0)';
 
-    // 3) ao terminar, atualiza estado
-    function onDone(e){
-      if (e.target !== next) return;
-      next.removeEventListener('transitionend', onDone);
-      curr.classList.remove('active');
-      next.classList.add('active');
-      idx = newIndex;
-
-      // normaliza z-index após a troca
-      curr.style.zIndex = 1;
-      next.style.zIndex = 2;
-
-      renderDots();
-    }
-    next.addEventListener('transitionend', onDone);
-  });
-}
-
+      next.addEventListener('transitionend', ()=>{
+        curr.classList.remove('active');
+        next.classList.add('active');
+        idx = newIndex;
+        curr.style.zIndex = 1;
+        next.style.zIndex = 2;
+        renderDots();
+      }, { once:true });
+    });
+  }
 
   function next(){ slideTo((idx + 1) % slides.length, +1); }
   function prev(){ slideTo((idx - 1 + slides.length) % slides.length, -1); }
-
   function go(n){
     if (n === idx) return;
     slideTo((n + slides.length) % slides.length, n > idx ? +1 : -1);
     restart();
   }
 
-  function start(){ stop(); timer = setInterval(next, INTERVAL); }
-  function stop(){ if (timer) { clearInterval(timer); timer = null; } }
-  function restart(){ stop(); start(); }
+  function start(){
+    stop();
+    animateProgress();
+    timer = setInterval(()=>{
+      next();
+      animateProgress();
+    }, INTERVAL);
+  }
+  function stop(){
+    if (timer) { clearInterval(timer); timer = null; }
+    if (progBar){
+      progBar.style.transition = 'none';
+      progBar.style.width = '0%';
+    }
+  }
+  function restart(){ stop(); if (!isHover && isInView && !document.hidden) start(); }
 
   function onKey(e){
-    if (!document.body.classList.contains('page-home')) return;
+    if (document.body.classList.contains('page-home') === false) return;
     if (e.key === 'ArrowRight') { e.preventDefault(); next(); restart(); }
     if (e.key === 'ArrowLeft')  { e.preventDefault(); prev(); restart(); }
   }
@@ -411,19 +456,29 @@
     touchStartX = touchStartY = null;
   }
 
+  car.addEventListener('mouseenter', () => { isHover = true;  stop(); });
+  car.addEventListener('mouseleave', () => { isHover = false; restart(); });
+  document.addEventListener('visibilitychange', () => document.hidden ? stop() : restart());
+
+  const io = new IntersectionObserver((entries)=>{
+    isInView = entries[0]?.isIntersecting ?? true;
+    isInView ? restart() : stop();
+  }, { threshold: .25 });
+  io.observe(car);
+
+  prevBtn?.addEventListener('click', ()=>{ prev(); restart(); });
+  nextBtn?.addEventListener('click', ()=>{ next(); restart(); });
+
+  car.addEventListener('touchstart', onTouchStart, { passive: true });
+  car.addEventListener('touchend', onTouchEnd, { passive: true });
+
   if (slides.length){
     slides.forEach(s => s.classList.remove('active'));
     slides[0].classList.add('active');
     layoutInitial();
     renderDots();
     start();
-
-    car.addEventListener('mouseenter', stop);
-    car.addEventListener('mouseleave', start);
     document.addEventListener('keydown', onKey);
-    document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
-    car.addEventListener('touchstart', onTouchStart, { passive: true });
-    car.addEventListener('touchend', onTouchEnd, { passive: true });
   }
 })();
 </script>
