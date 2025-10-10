@@ -42,6 +42,7 @@
     z-index: 2;
     font-size: 18px;   /* deixa o emoji legível */
     line-height: 1;    /* evita "pular" */
+    pointer-events: auto;
   }
   .sound-toggle:hover { background: #fff; transform: scale(1.05); }
   /* (removido: .sound-toggle svg { pointer-events:none; } porque não usamos mais SVG) */
@@ -213,7 +214,7 @@
     </video>
 
     <!-- Botão com emoji -->
-    <button class="sound-toggle" id="soundToggle" aria-label="Ativar som" title="Ativar som" type="button">🔇</button>
+    
 
     <div class="cl-caption">Casa Legal</div>
   </section>
