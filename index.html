@@ -260,6 +260,39 @@
     animation: shine 2s linear infinite;
     transition: width 900ms cubic-bezier(.22,.8,.28,1);
   }
+  /* === Texto "Progresso XX%" dentro da barra === */
+.regz-bar{
+  position: relative;
+}
+
+.regz-bar-label{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 900;
+  font-size: 1.15rem;
+
+  /* 🔵 azul institucional */
+  color: #000;
+
+  /* sombra clara + escura para contraste no verde/amarelo */
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.85),
+    0 2px 6px rgba(0,0,0,.35);
+
+  pointer-events: none;
+  letter-spacing: .4px;
+}
+
+.regz-bar-label .pct{
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+
 
   @keyframes shine {
     0%   { background-position: 0% 50%; }
@@ -356,6 +389,19 @@ body.page-resultados #miolo section {
   padding: 0;
 }
 
+.regz-legend{
+  background:#fff;
+  border:1px solid #e6edf8;
+  border-radius:12px;
+  box-shadow: var(--shadow);
+  padding:10px 12px;
+  font-family: Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#0f172a;
+  font-size:.92rem;
+  line-height:1.2;
+}
+
+
 
 
     </style>
@@ -387,21 +433,36 @@ body.page-resultados #miolo section {
 
         <div id="regzDesc" class="regz-body">
           <div class="regz-kpis">
-            <div class="regz-kpi">
-              <small>Meta até dez/2026</small>
-              <strong id="regzMeta">–</strong>
-            </div>
-            <div class="regz-kpi">
-              <small>Unidades trabalhadas</small>
-              <strong id="regzAtual">–</strong>
-            </div>
-            <div class="regz-kpi">
-              <small>Progresso</small>
-              <strong><span id="regzPerc">0</span>%</strong>
-            </div>
-          </div>
+  <div class="regz-kpi">
+    <small>Meta até dez/2026</small>
+    <strong id="regzMeta">–</strong>
+  </div>
 
-          <div class="regz-bar"><i id="regzBar"></i></div>
+  <div class="regz-kpi">
+    <small>Unidades trabalhadas</small>
+    <strong id="regzUnidades">–</strong>
+  </div>
+
+  <div class="regz-kpi">
+    <small>Concluídos</small>
+    <strong id="regzConcluidos">–</strong>
+  </div>
+
+  <div class="regz-kpi">
+    <small>Municípios atendidos</small>
+    <strong id="regzMunicipios">–</strong>
+  </div>
+</div>
+
+          
+
+         <div class="regz-bar">
+  <i id="regzBar"></i>
+  <div class="regz-bar-label">
+    Progresso <span class="pct"><span id="regzPerc">0</span>%</span>
+  </div>
+</div>
+
 
           <!-- Mapa dentro do modal -->
           <div id="regzMap" role="region" aria-label="Mapa de atuação (Regularizômetro)"></div>
@@ -899,12 +960,12 @@ body.page-resultados #miolo section {
   }
 
   // ======= MAPA (arquivos locais) =======
-  const POINTS_GEOJSON_URL     = "./pontos.json";
-  const MUNICIPIOS_GEOJSON_URL = "./municipios.json";
+  const POINTS_GEOJSON_URL     = "";
+  const MUNICIPIOS_GEOJSON_URL = "./PI_Municipios_2024.json";
   const SHP_ZIP_URL            = "";
 
   // ======= CAMADA EXTRA (.json) =======
-  const EXTRA_GEOJSON_URL      = "./municipios-atendidos.json";
+  const EXTRA_GEOJSON_URL      = "";
 
   // ======= DOM =======
   const $modal   = document.getElementById('regzModal');
@@ -916,15 +977,27 @@ body.page-resultados #miolo section {
 
 
   const $meta  = document.getElementById('regzMeta');
-  const $atual = document.getElementById('regzAtual');
-  const $perc  = document.getElementById('regzPerc');
+  const $unid  = document.getElementById('regzUnidades');     // unidades_trab
+  const $conc  = document.getElementById('regzConcluidos');   // atual
+  const $muni  = document.getElementById('regzMunicipios');   // quant_mun
+  const $perc  = document.getElementById('regzPerc');         // agora fica na barra
   const $bar   = document.getElementById('regzBar');
   const $upd   = document.getElementById('regzUpdated');
   const $link  = document.getElementById('regzSheetLink');
 
+
+
   // ======= Utils UI =======
   const br = (n)=> Number(n||0).toLocaleString('pt-BR');
   const clamp = (v,min,max)=> Math.max(min, Math.min(max, v));
+  // Normaliza nomes de municípios (sem acento / caixa alta)
+  const normName = (s) => (s || "")
+  .toString()
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .toUpperCase().trim();
+
+  let REGZ_ATENDIDOS = new Set(); // municípios da coluna "municipios"
+
 
   // Loop infinito do título enquanto o modal estiver aberto
   function pulseTitleInfinite(on=true, durMs=1200){
@@ -1080,66 +1153,123 @@ body.page-resultados #miolo section {
     }, delay);
   }
 
-  function updateUI({meta, atual, atualizado_em}){
-    const m = Number(meta||0);
-    const a = Number(atual||0);
-    const pct = m > 0 ? Math.max(0, Math.min(100, (a/m)*100)) : 0;
+  function updateUI({meta, concluidos, unidades, quant_mun, atualizado_em}){
+  const m = Number(meta||0);
+  const c = Number(concluidos||0);
+  const u = Number(unidades||0);
+  const qm = Number(quant_mun||0);
 
-    rollTo($meta, m, { duration: 900, turnsBase: 1, turnsRand: 1 });
-    rollTo($atual, a, { duration: 1000, turnsBase: 1, turnsRand: 2 });
-    rollTo($perc,  Math.round(pct), { duration: 800, turnsBase: 1, turnsRand: 1 });
+  const pct = m > 0 ? Math.max(0, Math.min(100, (c/m)*100)) : 0;
 
-    pulseOnEnd($meta, 950);
-    pulseOnEnd($atual, 1050);
-    pulseOnEnd($perc, 850);
+  rollTo($meta, m, { duration: 900, turnsBase: 1, turnsRand: 1 });
+  rollTo($unid, u, { duration: 950, turnsBase: 1, turnsRand: 1 });
+  rollTo($conc, c, { duration: 1000, turnsBase: 1, turnsRand: 2 });
+  rollTo($muni, qm, { duration: 850, turnsBase: 1, turnsRand: 1 });
 
-    $upd.textContent = guessUpdateLabel(atualizado_em);
-    requestAnimationFrame(()=>{ $bar.style.width = pct + '%'; });
-  }
+  // Progresso vai para a barra
+  rollTo($perc, Math.round(pct), { duration: 800, turnsBase: 1, turnsRand: 1 });
+
+  pulseOnEnd($meta, 950);
+  pulseOnEnd($unid, 980);
+  pulseOnEnd($conc, 1050);
+  pulseOnEnd($muni, 900);
+  pulseOnEnd($perc, 850);
+
+  $upd.textContent = guessUpdateLabel(atualizado_em);
+  requestAnimationFrame(()=>{ $bar.style.width = pct + '%'; });
+}
 
   // ======= CSV (planilha Google) =======
   function csvToRows(csv){
-    const lines = csv.trim().split(/\r?\n/);
-    return lines.map(l=>{
-      const out = []; let cur='', q=false;
-      for (let i=0;i<l.length;i++){
-        const ch = l[i];
-        if (ch === '"'){
-          if (q && l[i+1] === '"'){ cur+='"'; i++; } else q=!q;
-        } else if (ch === ',' && !q){
-          out.push(cur); cur='';
-        } else cur += ch;
+  // não usar trim() pra não perder colunas vazias no final
+  const lines = String(csv || '').split(/\r?\n/).filter(l => l.length);
+  return lines.map(line => {
+    const out = [];
+    let cur = '', q = false;
+
+    for (let i = 0; i < line.length; i++){
+      const ch = line[i];
+
+      if (ch === '"'){
+        // escape de aspas "" dentro da string
+        if (q && line[i+1] === '"'){ cur += '"'; i++; }
+        else q = !q;
+      } else if (ch === ',' && !q){
+        out.push(cur);
+        cur = '';
+      } else {
+        cur += ch;
       }
-      out.push(cur);
-      return out;
+    }
+    out.push(cur);
+
+    // ✅ sanitiza cada célula: remove aspas externas e espaços
+    return out.map(v => {
+      v = (v ?? '').toString().trim();
+      if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1);
+      return v.trim();
     });
-  }
+  });
+}
+
   async function fetchSheet(){
-    if (!CSV_URL) throw new Error('CSV_URL não configurada');
-    const res = await fetch(CSV_URL, { cache:'no-cache' });
-    if (!res.ok) throw new Error('Falha ao baixar CSV');
-    const csv = await res.text();
-    const rows = csvToRows(csv);
-    if (!rows.length) throw new Error('CSV vazio');
+  if (!CSV_URL) throw new Error('CSV_URL não configurada');
 
-    const head = rows[0].map(h => (h||'').trim().toLowerCase());
-    const iAtual = head.findIndex(h => ['atual','alcançado','alcancado','valor','progresso'].includes(h));
-    const iMeta  = head.findIndex(h => ['meta','total','objetivo'].includes(h));
-    const iUpd   = head.findIndex(h => ['atualizado_em','atualizacao','atualizado','updated','last_update','data'].includes(h));
+  const res = await fetch(CSV_URL, { cache:'no-cache' });
+  if (!res.ok) throw new Error('Falha ao baixar CSV: HTTP ' + res.status);
 
-    const row = rows[1] || [];
-    const theAtual = iAtual>=0 ? row[iAtual] : row[0];
-    const meta  = iMeta >=0 ? row[iMeta]  : row[1];
-    const atualizado_em = iUpd>=0 ? row[iUpd] : '';
+  const csv = await res.text();
+  const rows = csvToRows(csv);
+  if (rows.length < 2) throw new Error('CSV sem dados (precisa de cabeçalho + 1 linha)');
 
-    const normNum = (v)=> String(v??'').replace(/[^\d.,-]/g,'').replace(/\./g,'').replace(',', '.');
+  const head = rows[0].map(h => (h||'').trim().toLowerCase());
 
-    return { meta: normNum(meta), atual: normNum(theAtual), atualizado_em };
+  const idx = (aliases) => head.findIndex(h => aliases.includes(h));
+
+  const iMeta  = idx(['meta','total','objetivo']);
+  const iAtual = idx(['atual','concluidos','concluídos']);
+  const iUnid  = idx(['unidades_trab','unidades trab','unidades']);
+  const iQuant = idx(['quant_mun','qtd_mun','qt_mun','quant_municipios','qtd municipios']);
+  const iUpd   = idx(['atualizado_em','atualizacao','atualizado','data']);
+  const iMuni  = idx(['municipios','municípios']);
+
+  const row1 = rows[1] || [];
+
+  const normNum = (v)=> String(v??'')
+    .replace(/[^\d.,-]/g,'')
+    .replace(/\./g,'')
+    .replace(',', '.');
+
+  // valores
+  const meta        = iMeta  >= 0 ? row1[iMeta]  : '';
+  const concluidos  = iAtual >= 0 ? row1[iAtual] : '';
+  const unidades    = iUnid  >= 0 ? row1[iUnid]  : '';
+  const quant_mun   = iQuant >= 0 ? row1[iQuant] : '';
+  const atualizado_em = iUpd >= 0 ? row1[iUpd]   : '';
+
+  // municípios atendidos (coluna "municipios", várias linhas)
+  const set = new Set();
+  if (iMuni >= 0){
+    for (let r = 1; r < rows.length; r++){
+      const name = (rows[r] || [])[iMuni];
+      if (!name) continue;
+      set.add(normName(name));
+    }
   }
+  REGZ_ATENDIDOS = set;
+
+  return {
+    meta: normNum(meta),
+    concluidos: normNum(concluidos),
+    unidades: normNum(unidades),
+    quant_mun: normNum(quant_mun),
+    atualizado_em
+  };
+}
 
   // ======= MAPA no modal (Leaflet) =======
   let regzMap=null, regzCluster=null, regzMuniLayer=null, regzMapBooted=false;
-  let regzLayersCtrl=null, regzExtraLayer=null;
+  let regzLayersCtrl=null, regzExtraLayer=null, regzLegend=null;
 
   function numBRtoFloat(v){
     const s = String(v || '').replace(/\s+/g,'').replace(/\./g,'').replace(',', '.');
@@ -1178,27 +1308,35 @@ body.page-resultados #miolo section {
     }
   }
   async function loadMunicipios(){
-    if (MUNICIPIOS_GEOJSON_URL) {
-      const r = await fetch(MUNICIPIOS_GEOJSON_URL, { cache:'no-cache' });
-      if(!r.ok) throw new Error("municipios.json não encontrado");
-      const gj = await r.json();
-      if (regzMuniLayer) regzMap.removeLayer(regzMuniLayer);
-      regzMuniLayer = L.geoJSON(gj, {
-        style: ()=>({ color:'#0a489b', weight:1, opacity:.85, fillColor:'#4ade80', fillOpacity:.12 })
-      }).addTo(regzMap);
-      regzLayersCtrl?.addOverlay(regzMuniLayer, 'Municípios do Piauí');
-    } else if (SHP_ZIP_URL && window.shp) {
-      const gj = await shp(SHP_ZIP_URL);
-      const fc = (gj.type === 'FeatureCollection' || gj.type === 'Feature')
-        ? gj
-        : { type:'FeatureCollection', features:Object.values(gj).flatMap(g => g.features || []) };
-      if (regzMuniLayer) regzMap.removeLayer(regzMuniLayer);
-      regzMuniLayer = L.geoJSON(fc, {
-        style: ()=>({ color:'#0a489b', weight:1, opacity:.85, fillColor:'#4ade80', fillOpacity:.12 })
-      }).addTo(regzMap);
-      regzLayersCtrl?.addOverlay(regzMuniLayer, 'Municípios');
+  if (!MUNICIPIOS_GEOJSON_URL) return;
+
+  const r = await fetch(MUNICIPIOS_GEOJSON_URL, { cache:'no-cache' });
+  if(!r.ok) throw new Error("PI_Municipios_2024.json não encontrado");
+  const gj = await r.json();
+
+  if (regzMuniLayer) regzMap.removeLayer(regzMuniLayer);
+
+  regzMuniLayer = L.geoJSON(gj, {
+    style: (feat) => {
+      const p = feat.properties || {};
+      const nome = normName(p.NM_MUN || p.nome || p.municipio || p.name || "");
+      const isAtendido = REGZ_ATENDIDOS.has(nome);
+
+      if (isAtendido){
+        return { color:'#0a489b', weight:2, opacity:.95, fillColor:'#ffd500', fillOpacity:.60 };
+      }
+      return { color:'#0a489b', weight:1, opacity:.65, fillColor:'#4ade80', fillOpacity:.10 };
+    },
+    onEachFeature: (feat, layer) => {
+      const p = feat.properties || {};
+      const nome = p.NM_MUN || p.nome || p.municipio || p.name || 'Município';
+      layer.bindTooltip(nome, { sticky:true });
     }
-  }
+  }).addTo(regzMap);
+
+  
+}
+
 
   async function loadExtraLayer(){
     if (!EXTRA_GEOJSON_URL) return;
@@ -1211,27 +1349,71 @@ body.page-resultados #miolo section {
       try { regzLayersCtrl?.removeLayer(regzExtraLayer); } catch {}
     }
 
-    regzExtraLayer = L.geoJSON(gj, {
-      style: () => ({
-        color: '#1050a0',
-        weight: 2,
-        opacity: 0.9,
-        fillColor: '#1050a0',
-        fillOpacity: 0.50
-      }),
-      onEachFeature: (feat, layer) => {
-        const p = feat.properties || {};
-        const nome = p.nome || p.municipio || p.titulo || 'Registro';
-        const extraInfo = Object.entries(p)
-          .slice(0, 8)
-          .map(([k,v]) => `<div><small><b>${k}:</b> ${v}</small></div>`).join('');
-        layer.bindPopup(`<strong>${nome}</strong>${extraInfo ? `<br>${extraInfo}` : ''}`);
-      }
-    }).addTo(regzMap);
+    regzMuniLayer = L.geoJSON(gj, {
+  style: (feat) => {
+    const p = feat.properties || {};
+    const nome = normName(
+      p.NM_MUN || p.nome || p.municipio || p.NM_MUNICIP || p.name || ""
+    );
+
+    const isAtendido = REGZ_ATENDIDOS.has(nome);
+
+    // atendido: amarelo forte
+    if (isAtendido){
+      return { color:'#0a489b', weight:2, opacity:.95, fillColor:'#ffd500', fillOpacity:.60 };
+    }
+
+    // não atendido: só contorno azul e preenchimento bem leve
+    return { color:'#0a489b', weight:1, opacity:.65, fillColor:'#4ade80', fillOpacity:.10 };
+  },
+  onEachFeature: (feat, layer) => {
+    const p = feat.properties || {};
+    const nome = p.NM_MUN || p.nome || p.municipio || p.NM_MUNICIP || p.name || 'Município';
+    layer.bindTooltip(nome, { sticky:true });
+  }
+}).addTo(regzMap);
+
 
     try { regzExtraLayer.bringToFront(); } catch {}
     regzLayersCtrl?.addOverlay(regzExtraLayer, 'Municípios Atendidos');
   }
+
+  function addLegend(){
+  if (!regzMap) return;
+
+  // remove legenda anterior (se existir)
+  if (regzLegend) {
+    try { regzLegend.remove(); } catch(e) {}
+    regzLegend = null;
+  }
+
+  regzLegend = L.control({ position: 'bottomright' });
+
+  regzLegend.onAdd = function () {
+    const div = L.DomUtil.create('div', 'regz-legend');
+    div.innerHTML = `
+      <div style="font-weight:800; margin-bottom:6px;">Legenda</div>
+
+      <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <span style="width:14px;height:14px;border-radius:3px;background:#ffd500;border:2px solid #0a489b;display:inline-block;"></span>
+        <span>Município atendido</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
+        <span style="width:14px;height:14px;border-radius:3px;background:rgba(74,222,128,.10);border:1px solid #0a489b;display:inline-block;"></span>
+        <span>Município não atendido</span>
+      </div>
+    `;
+
+    // evita arrastar/zoom ao clicar na legenda
+    L.DomEvent.disableClickPropagation(div);
+    L.DomEvent.disableScrollPropagation(div);
+
+    return div;
+  };
+
+  regzLegend.addTo(regzMap);
+}
 
   function initRegzMapOnce(){
     if (regzMapBooted) return;
@@ -1242,6 +1424,9 @@ body.page-resultados #miolo section {
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       { maxZoom:20, attribution:'© OpenStreetMap · © Carto' }).addTo(regzMap);
 
+      addLegend();
+
+
     regzLayersCtrl = L.control.layers(null, {}, { collapsed: false }).addTo(regzMap);
 
     const piauiBounds = L.latLngBounds(L.latLng(-10.5,-45.0), L.latLng(-2.5,-40.0));
@@ -1249,14 +1434,12 @@ body.page-resultados #miolo section {
 
     regzCluster = L.markerClusterGroup({ showCoverageOnHover:false });
     regzMap.addLayer(regzCluster);
-    regzLayersCtrl.addOverlay(regzCluster, 'Localização');
+    
 
     loadMunicipios().catch(console.warn);
-    loadLocalPoints()
-      .then(()=>{ try{ regzMap.fitBounds(regzCluster.getBounds().pad(0.08)); }catch{} })
-      .catch(console.warn);
+    loadLocalPoints().catch(console.warn);
 
-    loadExtraLayer().catch(console.warn);
+
 
     regzMapBooted = true;
   }
@@ -1267,6 +1450,7 @@ body.page-resultados #miolo section {
     fetchSheet()
       .then(data=>{
         updateUI(data);
+        try { regzMuniLayer?.setStyle(regzMuniLayer.options.style); } catch {}
         if (CSV_URL.includes('/gviz/')) {
           $link.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=0`;
         } else {
@@ -1275,10 +1459,11 @@ body.page-resultados #miolo section {
         $link.style.display = 'inline';
       })
       .catch(err=>{
-        console.warn('Regularizômetro (planilha): fallback demonstrativo. Motivo:', err);
-        updateUI({ meta: 5000, atual: 1200, atualizado_em: new Date().toISOString() });
-        $link.style.display = 'none';
-      });
+  console.warn('Regularizômetro (planilha): fallback demonstrativo. Motivo:', err);
+  updateUI({ meta: 5000, concluidos: 1200, unidades: 0, quant_mun: 0, atualizado_em: new Date().toISOString() });
+  $link.style.display = 'none';
+});
+
 
     setTimeout(()=>{
       initRegzMapOnce();
