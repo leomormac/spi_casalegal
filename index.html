@@ -389,16 +389,41 @@ body.page-resultados #miolo section {
   padding: 0;
 }
 
-.regz-legend{
-  background:#fff;
-  border:1px solid #e6edf8;
-  border-radius:12px;
+/* ===== Nova Legenda Retrátil ===== */
+.regz-collapsible-legend {
+  background: transparent;
+  font-family: Montserrat, system-ui, sans-serif;
+  color: #0f172a;
+}
+
+.btn-toggle-legend {
+  background: #fff;
+  border: 1px solid #e6edf8;
+  border-radius: 6px;
   box-shadow: var(--shadow);
-  padding:10px 12px;
-  font-family: Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color:#0f172a;
-  font-size:.92rem;
-  line-height:1.2;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+  color: #0a489b;
+  width: 100%;
+  text-align: left;
+}
+
+.btn-toggle-legend:hover {
+  background: #f7fbff;
+}
+
+.legend-content {
+  background: #fff;
+  border: 1px solid #e6edf8;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 12px 14px;
+  max-height: 40vh;
+  overflow-y: auto;
 }
 
 
@@ -962,10 +987,27 @@ body.page-resultados #miolo section {
   // ======= MAPA (arquivos locais) =======
   const POINTS_GEOJSON_URL     = "";
   const MUNICIPIOS_GEOJSON_URL = "./PI_Municipios_2024.json";
+  const TERRITORIOS_GEOJSON_URL = "./territorios.geojson";
   const SHP_ZIP_URL            = "";
 
   // ======= CAMADA EXTRA (.json) =======
   const EXTRA_GEOJSON_URL      = "";
+
+  // ======= CORES DOS TERRITÓRIOS (Baseado na legenda da Imagem 2) =======
+  const coresTerritorios = {
+    "CARNAUBAIS": "#ef4444", // Vermelho
+    "CHAPADA DAS MANGABEIRAS": "#3b82f6", // Azul claro
+    "CHAPADA VALE DO ITAIM": "#22c55e", // Verde vibrante
+    "COCAIS": "#a855f7", // Roxo
+    "ENTRE RIOS": "#f97316", // Laranja
+    "PLANICIE LITORANEA": "#fde047", // Amarelo
+    "SERRA DA CAPIVARA": "#d97706", // Marrom/Mostarda
+    "TABULEIROS DO ALTO PARNAIBA": "#f472b6", // Rosa/Magenta
+    "VALE DO CANINDE": "#94a3b8", // Cinza médio
+    "VALE DO RIO GUARIBAS": "#14b8a6", // Verde Água/Teal
+    "VALE DO SAMBITO": "#fdba74", // Pêssego/Salmão
+    "VALE DOS RIOS PIAUI E ITAUEIRAS": "#60a5fa" // Azul Claro 2
+  };
 
   // ======= DOM =======
   const $modal   = document.getElementById('regzModal');
@@ -998,6 +1040,26 @@ body.page-resultados #miolo section {
 
   let REGZ_ATENDIDOS = new Set(); // municípios da coluna "municipios"
 
+  // Função para escurecer uma cor HEX
+  function escurecerCor(hex, percent) {
+    if (!hex) return "#cccccc";
+    // Remove o # se existir
+    hex = hex.replace(/^\s*#|\s*$/g, '');
+    if(hex.length === 3) hex = hex.replace(/(.)/g, '$1$1');
+    
+    let r = parseInt(hex.substr(0, 2), 16);
+    let g = parseInt(hex.substr(2, 2), 16);
+    let b = parseInt(hex.substr(4, 2), 16);
+
+    r = Math.floor(r * (1 - percent));
+    g = Math.floor(g * (1 - percent));
+    b = Math.floor(b * (1 - percent));
+
+    return "#" + 
+      (r < 16 ? "0" : "") + r.toString(16) + 
+      (g < 16 ? "0" : "") + g.toString(16) + 
+      (b < 16 ? "0" : "") + b.toString(16);
+  }
 
   // Loop infinito do título enquanto o modal estiver aberto
   function pulseTitleInfinite(on=true, durMs=1200){
@@ -1308,35 +1370,200 @@ body.page-resultados #miolo section {
     }
   }
   async function loadMunicipios(){
-  if (!MUNICIPIOS_GEOJSON_URL) return;
+    if (!MUNICIPIOS_GEOJSON_URL) return;
 
-  const r = await fetch(MUNICIPIOS_GEOJSON_URL, { cache:'no-cache' });
-  if(!r.ok) throw new Error("PI_Municipios_2024.json não encontrado");
-  const gj = await r.json();
+    const r = await fetch(MUNICIPIOS_GEOJSON_URL, { cache:'no-cache' });
+    if(!r.ok) return;
+    const gj = await r.json();
 
-  if (regzMuniLayer) regzMap.removeLayer(regzMuniLayer);
+    if (regzMuniLayer) regzMap.removeLayer(regzMuniLayer);
 
-  regzMuniLayer = L.geoJSON(gj, {
-    style: (feat) => {
+    regzMuniLayer = L.geoJSON(gj, {
+      style: () => {
+        return { 
+          color: '#ffffff', // Linhas brancas para separar os municípios
+          weight: 0.8,      // Espessura bem fininha
+          fillOpacity: 0    // Fundo transparente para ver o território colorido
+        };
+      },
+      onEachFeature: (feat, layer) => {
+        const p = feat.properties || {};
+        const nome = p.NM_MUN || p.nome || p.municipio || p.name || 'Município';
+        layer.bindTooltip(`<strong>${nome}</strong>`, { sticky:true });
+      }
+    }).addTo(regzMap);
+  }
+
+  let regzTerritoriosLayer = null;
+
+  // Função auxiliar para remover acentos e deixar maiúsculo (se já não tiver)
+  const normalizarNome = (str) => {
+    if (!str) return "";
+    return str.toString()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+      .toUpperCase()
+      .trim();
+  };
+
+  let regzAtendidosLayer = null;
+
+  async function loadMunicipiosAtendidos(){
+    if (!MUNICIPIOS_GEOJSON_URL) return;
+
+    const r = await fetch(MUNICIPIOS_GEOJSON_URL, { cache:'no-cache' });
+    if(!r.ok) return;
+    const gj = await r.json();
+
+    if (regzAtendidosLayer) regzMap.removeLayer(regzAtendidosLayer);
+
+    // Criamos um grupo para guardar TANTO as áreas coloridas QUANTO os pinos juntos
+    regzAtendidosLayer = L.layerGroup();
+
+    // Filtra apenas os municípios que estão na planilha do Google Sheets
+    const featuresAtendidos = (gj.features || []).filter(feat => {
       const p = feat.properties || {};
       const nome = normName(p.NM_MUN || p.nome || p.municipio || p.name || "");
-      const isAtendido = REGZ_ATENDIDOS.has(nome);
+      return REGZ_ATENDIDOS.has(nome); 
+    });
 
-      if (isAtendido){
-        return { color:'#0a489b', weight:2, opacity:.95, fillColor:'#ffd500', fillOpacity:.60 };
+    // 1. Desenha os Polígonos (Municípios escurecidos)
+    const polyLayer = L.geoJSON({ type: "FeatureCollection", features: featuresAtendidos }, {
+      style: (feat) => {
+        const p = feat.properties || {};
+        
+        // Pega a propriedade de território dentro do arquivo de MUNICÍPIOS (ajuste se a chave for diferente)
+        const nomeTerritorioCru = p.pi_micro_m || p.territorio || p.Territorio || "";
+        const nomeLimpo = normalizarNome(nomeTerritorioCru);
+        
+        // Busca a cor base no dicionário (com a trava de segurança para o Parnaíba)
+        let corBase = coresTerritorios[nomeLimpo];
+        if (!corBase) {
+          if (nomeLimpo.includes("TABULEIRO") || nomeLimpo.includes("PARNAIBA")) corBase = "#f472b6";
+          else corBase = "#94a3b8"; // Cor neutra de segurança
+        }
+
+        // Deixa a cor 35% mais escura (0.35)
+        const corMaisEscura = escurecerCor(corBase, 0.35);
+
+        return { 
+          color: '#ffffff',       // Borda branca fininha
+          weight: 1.2,
+          fillColor: corMaisEscura, // Cor do território mais escura
+          fillOpacity: 0         // Cor bem forte e sólida
+        };
+      },
+      onEachFeature: (feat, layer) => {
+        const p = feat.properties || {};
+        const nome = p.NM_MUN || p.nome || p.municipio || p.name || 'Município';
+        layer.bindTooltip(`<strong>${nome}</strong><br><span style="color:#0a489b; font-weight:800;">✔ Atendido</span>`, { sticky:true });
       }
-      return { color:'#0a489b', weight:1, opacity:.65, fillColor:'#4ade80', fillOpacity:.10 };
-    },
-    onEachFeature: (feat, layer) => {
-      const p = feat.properties || {};
-      const nome = p.NM_MUN || p.nome || p.municipio || p.name || 'Município';
-      layer.bindTooltip(nome, { sticky:true });
+    });
+
+    // Adiciona os polígonos ao grupo
+    regzAtendidosLayer.addLayer(polyLayer);
+
+    // 2. Adiciona o Pino de Localização no centro exato de cada município
+    polyLayer.eachLayer((layer) => {
+      if (layer.getBounds) {
+        // Acha o centro do polígono do município
+        const center = layer.getBounds().getCenter();
+        
+        // Cria um ícone customizado com o Bootstrap Icons (Pino vermelho do Casa Legal)
+        const customPin = L.divIcon({
+  className: 'custom-map-pin',
+  html: '<i class="bi bi-geo-alt-fill" style="color: #ef3f22; font-size: 15px; -webkit-text-stroke: 0.5px white; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.5));"></i>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 20],
+  popupAnchor: [0, -20]
+});
+
+        // Pega o nome para o popup do pino
+        const p = layer.feature.properties || {};
+        const nome = p.NM_MUN || p.nome || p.municipio || p.name || 'Município';
+
+        // Cria o marcador e joga dentro do mesmo grupo
+        const marker = L.marker(center, { icon: customPin });
+        marker.bindPopup(`<strong>${nome}</strong><br><span style="color:#22c55e;">✔ Ação Realizada</span>`);
+        
+        regzAtendidosLayer.addLayer(marker);
+      }
+    });
+
+   // Adiciona tudo de uma vez ao controle de camadas lateral
+    if (regzLayersCtrl) {
+      regzLayersCtrl.addOverlay(regzAtendidosLayer, "Municípios Atendidos");
     }
-  }).addTo(regzMap);
+    
+    // 👇 ADICIONE ESTA LINHA AQUI 👇
+    regzAtendidosLayer.addTo(regzMap);
+  }
 
-  
-}
+  async function loadTerritorios() {
+    if (!TERRITORIOS_GEOJSON_URL) return;
 
+    try {
+      const r = await fetch(TERRITORIOS_GEOJSON_URL, { cache: 'no-cache' });
+      if (!r.ok) throw new Error("Arquivo de territórios não encontrado");
+      const gj = await r.json();
+
+      if (regzTerritoriosLayer) regzMap.removeLayer(regzTerritoriosLayer);
+
+      regzTerritoriosLayer = L.geoJSON(gj, {
+        style: (feat) => {
+          const p = feat.properties || {};
+          
+          // 👇 Pega a propriedade correta do seu GeoJSON (pi_micro_m)
+          const nomeCru = p.pi_micro_m || p.PI_MICRO_M || "";
+          
+          // Normaliza o nome (ex: "Chapada das Mangabeiras" vira "CHAPADA DAS MANGABEIRAS")
+          const nomeLimpo = normalizarNome(nomeCru);
+          
+          // Busca a cor. Se não achar, usa um cinza claro.
+          // Busca a cor exata no dicionário
+          let corBase = coresTerritorios[nomeLimpo]; 
+
+          // Se não achar a cor exata (porque o GeoJSON tem erro de digitação), entra nessa trava de segurança:
+          if (!corBase) {
+            // Se o nome tiver a palavra TABULEIRO ou PARNAIBA, força a cor Rosa
+            if (nomeLimpo.includes("TABULEIRO") || nomeLimpo.includes("PARNAIBA")) {
+              corBase = "#f472b6"; 
+            } else {
+              corBase = "#cccccc"; // Cinza para qualquer outro que falhe
+            }
+            
+            // Isso aqui vai imprimir no console (Aperte F12 no navegador) o nome exato que está com erro no arquivo
+            console.warn("⚠️ O GeoJSON tem um território escrito diferente do dicionário:", nomeCru);
+          } 
+
+          return {
+            color: '#ffffff', // Borda divisória branca (igual Imagem 2)
+            weight: 1.2,      // Espessura fina
+            opacity: 0.9,     // Opacidade da borda
+            fillColor: corBase, 
+            fillOpacity: 0.65 // Leve transparência para enxergar o mapa base
+          };
+        },
+        onEachFeature: (feat, layer) => {
+          const p = feat.properties || {};
+          // Pega o nome original para exibir no Tooltip (com acentos)
+          const nomeOrig = p.pi_micro_m || 'Território';
+          layer.bindTooltip(`<strong>Território: ${nomeOrig}</strong>`, { sticky: true });
+        }
+      });
+
+      // Adiciona a camada ao mapa
+      regzTerritoriosLayer.addTo(regzMap);
+
+      // Adiciona ao controle do lado direito
+      if (regzLayersCtrl) {
+        regzLayersCtrl.addOverlay(regzTerritoriosLayer, "Territórios");
+      }
+
+    } catch (e) {
+      console.warn("Erro ao carregar a camada de territórios:", e);
+    }
+  }
 
   async function loadExtraLayer(){
     if (!EXTRA_GEOJSON_URL) return;
@@ -1379,41 +1606,66 @@ body.page-resultados #miolo section {
   }
 
   function addLegend(){
-  if (!regzMap) return;
+    if (!regzMap) return;
 
-  // remove legenda anterior (se existir)
-  if (regzLegend) {
-    try { regzLegend.remove(); } catch(e) {}
-    regzLegend = null;
+    if (regzLegend) {
+      try { regzLegend.remove(); } catch(e) {}
+      regzLegend = null;
+    }
+
+    regzLegend = L.control({ position: 'topleft' });
+
+    regzLegend.onAdd = function () {
+      const div = L.DomUtil.create('div', 'regz-collapsible-legend');
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.disableScrollPropagation(div);
+
+      const btn = L.DomUtil.create('button', 'btn-toggle-legend', div);
+      btn.innerHTML = 'Esconder Legendas';
+
+      const content = L.DomUtil.create('div', 'legend-content', div);
+      
+      // Ajuste crucial: Define uma altura máxima e permite rolagem se a lista for muito longa
+      content.style.maxHeight = '300px'; 
+      content.style.overflowY = 'auto';
+      content.style.overflowX = 'hidden';
+      content.style.paddingRight = '8px'; // Espaçamento para a barra de rolagem não sobrepor o texto
+
+      // Fontes, ícones e espaçamentos reduzidos
+      let html = `
+        <div style="display:flex; align-items:center; gap:5px; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #ddd;">
+          <i class="bi bi-geo-alt-fill" style="color: #ef3f22; font-size: 13px; -webkit-text-stroke: 0.5px white; filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.5));"></i>
+          <span style="font-weight:700; font-size: 0.8rem;">Municípios Atendidos</span>
+        </div>
+        <div style="font-weight:700; margin-bottom:4px; font-size: 0.8rem;">Territórios</div>
+      `;
+
+      for (const [terr, color] of Object.entries(coresTerritorios)) {
+        html += `
+          <div style="display:flex; align-items:center; gap:5px; margin:3px 0;">
+            <span style="min-width:14px;height:10px;border-radius:2px;background:${color};border:1px solid rgba(0,0,0,0.1);display:inline-block;"></span>
+            <span style="font-size:0.7rem; line-height: 1.1;">${terr}</span>
+          </div>
+        `;
+      }
+      content.innerHTML = html;
+
+      L.DomEvent.on(btn, 'click', function(e) {
+        L.DomEvent.stopPropagation(e);
+        if (content.style.display === 'none') {
+          content.style.display = 'block';
+          btn.innerHTML = 'Esconder Legendas';
+        } else {
+          content.style.display = 'none';
+          btn.innerHTML = 'Mostrar Legendas';
+        }
+      });
+
+      return div;
+    };
+
+    regzLegend.addTo(regzMap);
   }
-
-  regzLegend = L.control({ position: 'bottomright' });
-
-  regzLegend.onAdd = function () {
-    const div = L.DomUtil.create('div', 'regz-legend');
-    div.innerHTML = `
-      <div style="font-weight:800; margin-bottom:6px;">Legenda</div>
-
-      <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
-        <span style="width:14px;height:14px;border-radius:3px;background:#ffd500;border:2px solid #0a489b;display:inline-block;"></span>
-        <span>Município atendido</span>
-      </div>
-
-      <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
-        <span style="width:14px;height:14px;border-radius:3px;background:rgba(74,222,128,.10);border:1px solid #0a489b;display:inline-block;"></span>
-        <span>Município não atendido</span>
-      </div>
-    `;
-
-    // evita arrastar/zoom ao clicar na legenda
-    L.DomEvent.disableClickPropagation(div);
-    L.DomEvent.disableScrollPropagation(div);
-
-    return div;
-  };
-
-  regzLegend.addTo(regzMap);
-}
 
   function initRegzMapOnce(){
     if (regzMapBooted) return;
@@ -1421,13 +1673,37 @@ body.page-resultados #miolo section {
     if (!el) return;
 
     regzMap = L.map(el, { zoomControl:true, minZoom:5, maxZoom:19 });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-      { maxZoom:20, attribution:'© OpenStreetMap · © Carto' }).addTo(regzMap);
+    // --- INÍCIO: MAPAS DE FUNDO ---
+    const mapaClaro = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { 
+      maxZoom:20, attribution:'© OpenStreetMap · © Carto' 
+    });
+    
+    const mapaRuas = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+      maxZoom: 19, attribution: '© OpenStreetMap' 
+    });
+    
+    const mapaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { 
+      attribution: '© Esri' 
+    });
 
-      addLegend();
+    // Define qual mapa aparece primeiro ao carregar a página
+    mapaClaro.addTo(regzMap);
 
+    // Opções que vão aparecer no menu
+    const opcoesDeMapa = {
+      "Mapa Claro": mapaClaro,
+      "Ruas": mapaRuas,
+      "Satélite": mapaSatelite
+    };
 
-    regzLayersCtrl = L.control.layers(null, {}, { collapsed: false }).addTo(regzMap);
+    // Cria o botão no canto inferior direito (bottomright)
+    L.control.layers(opcoesDeMapa, null, { position: 'bottomright', collapsed: true }).addTo(regzMap);
+    // --- FIM: MAPAS DE FUNDO ---
+
+    addLegend(); // Sua legenda retrátil na esquerda
+
+    // 👇 Garante que o menu de camadas fique no canto superior direito
+    regzLayersCtrl = L.control.layers(null, {}, { collapsed: false, position: 'topright' }).addTo(regzMap);
 
     const piauiBounds = L.latLngBounds(L.latLng(-10.5,-45.0), L.latLng(-2.5,-40.0));
     regzMap.fitBounds(piauiBounds);
@@ -1435,11 +1711,14 @@ body.page-resultados #miolo section {
     regzCluster = L.markerClusterGroup({ showCoverageOnHover:false });
     regzMap.addLayer(regzCluster);
     
-
-    loadMunicipios().catch(console.warn);
-    loadLocalPoints().catch(console.warn);
-
-
+    // Isso garante a ordem exata das camadas (uma sobre a outra)
+    async function carregarCamadasOrdenadas() {
+      await loadTerritorios();         // 1º Fundo colorido dos territórios
+      await loadMunicipios();          // 2º Linhas brancas dos municípios por cima
+      await loadMunicipiosAtendidos(); // 3º Prepara a camada amarela no menu
+      await loadLocalPoints();         // 4º Coloca os pins (se houver) por cima de tudo
+    }
+    carregarCamadasOrdenadas().catch(console.warn);
 
     regzMapBooted = true;
   }
