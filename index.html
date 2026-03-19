@@ -426,6 +426,122 @@ body.page-resultados #miolo section {
   overflow-y: auto;
 }
 
+/* =========================================
+   RESPONSIVIDADE (Celulares e Tablets menores)
+   ========================================= */
+@media (max-width: 768px) {
+    
+    /* 1. Modal ocupa a tela inteira com rolagem INTERNA */
+    .modal-content {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        max-height: 100vh;
+        border-radius: 0;
+        padding: 15px 15px 25px 15px; /* Margem extra no fundo */
+        overflow-y: auto !important; /* Força o scroll interno */
+        box-sizing: border-box;
+        position: relative; /* Referência para o botão fechar */
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 2. Cabeçalho DESEMPILHADO (Logo, Título e Botão) */
+    .modal-header {
+        display: flex;
+        flex-direction: column; /* NO SIDE-BY-SIDE */
+        align-items: center; /* Centraliza logo e título */
+        justify-content: flex-start;
+        text-align: center;
+        width: 100%;
+        margin-bottom: 15px;
+        gap: 8px; /* Espaço entre logo e título */
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-top: 25px; /* Espaço pro botão fechar */
+    }
+
+    /* Estilo da Logo no Celular */
+    .logo {
+        margin: 0 auto;
+    }
+    .logo img {
+        height: 35px; /* Controla altura da imagem */
+    }
+
+    /* Título: FONTE MENOR e CENTRALIZADA (NUNCA OVERLAP) */
+    .modal-title {
+        font-size: 1.1rem !important; /* Diminui a fonte significativamente */
+        line-height: 1.2;
+        margin: 0;
+        width: 100%;
+        color: #2c3e50;
+        white-space: normal; /* Permite quebrar linha se necessário */
+    }
+
+    /* Botão Fechar: SEMPRE VISÍVEL e no CANTO */
+    .close-button {
+        display: block !important;
+        position: absolute !important;
+        top: 10px;
+        right: 10px;
+        z-index: 999; /* Garante que está por cima de tudo */
+        background-color: #f8f9fa !important;
+        border: 1px solid #ddd !important;
+        padding: 5px 10px !important;
+        font-size: 11px !important;
+        color: #333 !important;
+        border-radius: 4px;
+        visibility: visible !important;
+    }
+
+    /* 3. Métricas: Grade 2x2 mais compacta */
+    .metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .metric-block {
+        padding: 8px;
+        text-align: center;
+    }
+    
+    .metric-title {
+        font-size: 0.7rem;
+    }
+    
+    .metric-value {
+        font-size: 1.1rem;
+    }
+
+    /* 4. Barra de Progresso */
+    .progress-bar-container { height: 18px; }
+    .progress-text { font-size: 10px; }
+
+    /* 5. Mapa (fixar altura para garantir o scroll) */
+    .map-section {
+        flex: none; 
+        height: 300px; /* Altura fixa segura */
+        margin-bottom: 15px;
+    }
+
+    /* 6. Rodapé (garantir que não esteja cortado) */
+    .modal-footer {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: auto; /* Empurra pro final da área de scroll */
+        padding-bottom: 15px;
+    }
+    
+    .action-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+    }
+}
+
 
 
 
@@ -1006,7 +1122,7 @@ body.page-resultados #miolo section {
     "VALE DO CANINDE": "#94a3b8", // Cinza médio
     "VALE DO RIO GUARIBAS": "#14b8a6", // Verde Água/Teal
     "VALE DO SAMBITO": "#fdba74", // Pêssego/Salmão
-    "VALE DOS RIOS PIAUI E ITAUEIRAS": "#60a5fa" // Azul Claro 2
+    "VALE DOS RIOS PIAUI E ITAUEIRA": "#c7c7c7" // Azul Claro 2
   };
 
   // ======= DOM =======
